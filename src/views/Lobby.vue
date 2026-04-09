@@ -65,8 +65,8 @@ onMounted(() => {
       <p class="text-cn-cream/40 text-sm mt-1">等待玩家加入...</p>
     </div>
 
-    <!-- Player grid -->
-    <div class="grid grid-cols-4 gap-4 justify-items-center mb-8">
+    <!-- Player row -->
+    <div class="flex gap-2 justify-center flex-wrap mb-4">
       <PlayerSeat
         v-for="p in players"
         :key="p.id"
