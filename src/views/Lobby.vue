@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { Button } from 'vant'
+import 'vant/es/button/style'
 import { useWebSocket } from '@/composables/useWebSocket'
 import { useAuthStore } from '@/stores/auth'
 import { useRoomStore } from '@/stores/room'
@@ -36,7 +38,6 @@ function toggleReady() {
 }
 
 onMounted(() => {
-  // Connect WebSocket — server will send room_state immediately
   connect(roomId, authStore.token, authStore.user?.name)
 
   on('room_state', (msg: WSMessage) => {
@@ -58,15 +59,18 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col px-4 py-6">
+  <div class="min-h-screen flex flex-col px-4 py-6 bg-pattern">
     <!-- Header -->
     <div class="text-center mb-6">
-      <h1 class="text-2xl font-chinese text-cn-gold">房间 {{ roomId.slice(0, 6) }}</h1>
-      <p class="text-cn-cream/40 text-sm mt-1">等待玩家加入...</p>
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card">
+        <span class="text-cn-gold/60 text-xs">房间</span>
+        <span class="text-cn-gold font-serif-cn text-lg font-bold tracking-wider">{{ roomId.slice(0, 6) }}</span>
+      </div>
+      <p class="text-cn-cream/30 text-xs mt-2 tracking-wider">等待玩家加入...</p>
     </div>
 
     <!-- Player row -->
-    <div class="flex gap-2 justify-center flex-wrap mb-4">
+    <div class="flex gap-2.5 justify-center flex-wrap mb-4">
       <PlayerSeat
         v-for="p in players"
         :key="p.id"
@@ -86,24 +90,47 @@ onMounted(() => {
     </div>
 
     <!-- Entering overlay -->
-    <div v-if="entering" class="fixed inset-0 z-50 bg-cn-ink/90 flex flex-col items-center justify-center">
-      <div class="w-8 h-8 border-2 border-cn-gold/30 border-t-cn-gold rounded-full animate-spin mb-4" />
-      <p class="text-cn-gold font-chinese text-xl">进入游戏中...</p>
+    <div v-if="entering" class="fixed inset-0 z-50 bg-cn-ink/95 flex flex-col items-center justify-center">
+      <div class="w-10 h-10 border-2 border-cn-gold/30 border-t-cn-gold rounded-full animate-spin mb-4" />
+      <p class="text-gold-gradient font-serif-cn text-xl">进入游戏中...</p>
     </div>
 
     <!-- Ready button -->
     <div class="mt-auto flex justify-center pb-6">
-      <button
+      <Button
         v-if="!entering"
-        class="w-full max-w-64 py-3.5 rounded-xl font-chinese text-xl tracking-wider
-               transition-colors border-2"
-        :class="isReady
-          ? 'bg-cn-ink/40 border-cn-cream/30 text-cn-cream/60 active:bg-cn-ink/60'
-          : 'bg-cn-red border-cn-gold text-cn-gold active:bg-cn-dark-red'"
+        class="lobby-ready-btn"
+        :class="isReady ? 'lobby-ready-btn--active' : ''"
+        size="large"
         @click="toggleReady"
       >
-        {{ isReady ? '取消准备' : '准备' }}
-      </button>
+        <span class="font-serif-cn text-xl tracking-wider">{{ isReady ? '取消准备' : '准 备' }}</span>
+      </Button>
     </div>
   </div>
 </template>
+
+<style scoped>
+.lobby-ready-btn {
+  width: 100%;
+  max-width: 256px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #C41E2A 0%, #8B1A1A 100%);
+  border: 2px solid #D4A853;
+  color: #D4A853;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 200ms ease;
+  box-shadow: 0 4px 16px rgba(196, 30, 42, 0.3);
+}
+.lobby-ready-btn:active {
+  transform: scale(0.97);
+}
+.lobby-ready-btn--active {
+  background: rgba(26, 26, 46, 0.5);
+  border-color: rgba(245, 230, 200, 0.2);
+  color: rgba(245, 230, 200, 0.4);
+  box-shadow: none;
+}
+</style>

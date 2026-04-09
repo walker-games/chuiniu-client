@@ -10,6 +10,7 @@ const CDN = 'https://images.walker-learn.xyz/chuiniu/dice'
   <img
     :src="`${CDN}/dice-${value}.png`"
     :alt="`${value}`"
-    class="w-12 h-12 rounded-lg shadow-md select-none"
+    class="w-12 h-12 rounded-lg select-none"
+    style="filter: drop-shadow(0 2px 6px rgba(212, 168, 83, 0.2));"
   />
 </template>

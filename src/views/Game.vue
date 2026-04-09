@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { Button } from 'vant'
+import 'vant/es/button/style'
 import { useWebSocket } from '@/composables/useWebSocket'
 import { useAuthStore } from '@/stores/auth'
 import { useRoomStore } from '@/stores/room'
@@ -125,7 +127,6 @@ function handleNextRound() {
   hasRolled.value = false
   showNextRound.value = false
   addMsg('system', '--- 新一轮 ---')
-  // Stay on game page, just reset state. Server will handle new round when all ready.
   send('ready', { ready: true })
 }
 
@@ -150,7 +151,6 @@ onMounted(() => {
       if (turnId) gameStore.setTurn(turnId)
     }
 
-    // Detect other players rolling via state diff
     if (data.players) {
       for (const p of data.players) {
         if (p.id === myId.value) continue
@@ -172,16 +172,15 @@ onMounted(() => {
   })
 
   on('game_start', () => {
-    // New round started — reset local state
     gameStore.reset()
     hasRolled.value = false
     showNextRound.value = false
-    addMsg('system', `第${roundNumber.value}轮开始！`)
+    addMsg('system', `第${roundNumber.value}轮开始!`)
   })
 
   on('all_rolled', () => {
     gameStore.setPhase('bidding')
-    addMsg('system', '全部就绪，开始叫点！')
+    addMsg('system', '全部就绪，开始叫点!')
   })
 
   on('bid_made', (msg: WSMessage) => {
@@ -193,7 +192,7 @@ onMounted(() => {
       mode: data.mode as 'fei' | 'zhai',
     })
     const name = getPlayerName(data.player_id)
-    const modeText = data.mode === 'fei' ? '🎲飞' : '🔒斋'
+    const modeText = data.mode === 'fei' ? '飞' : '斋'
     addMsg('bid', `${data.count}个${data.face} ${modeText}`, data.player_id, name)
   })
 
@@ -214,16 +213,13 @@ onMounted(() => {
     const bidderName = getPlayerName(bidder)
     addMsg('challenge', '', data.challenger, challengerName)
 
-    const modeText = data.bid?.mode === 'fei' ? '🎲飞' : '🔒斋'
+    const modeText = data.bid?.mode === 'fei' ? '飞' : '斋'
     const bidText = `${data.bid?.count}个${data.bid?.face} ${modeText}`
-    const isMyWin = data.winner === myId.value
-    const isMyLoss = data.loser === myId.value
     const winnerName = getPlayerName(data.winner)
     const loserName = getPlayerName(data.loser)
-    const myEmoji = isMyWin ? ' 😎' : isMyLoss ? ' 😭' : ''
     addMsg(
       'result',
-      `${challengerName} 开 ${bidderName}\n叫点: ${bidText}\n实际: ${data.actual_count}个\n🏆 ${winnerName} 赢！🍺 ${loserName} 受罚${myEmoji}`,
+      `${challengerName} 开 ${bidderName}\n叫点: ${bidText}\n实际: ${data.actual_count}个\n${winnerName} 赢! ${loserName} 受罚`,
     )
     play('challenge')
   })
@@ -232,9 +228,8 @@ onMounted(() => {
     const data = msg.data as any
     const loserId = data.loser
     const name = getPlayerName(loserId)
-    const isMe = loserId === myId.value
     const punishText = typeof data.punishment === 'string' ? data.punishment : data.punishment?.text || '喝一杯'
-    addMsg('result', `${isMe ? '😭 ' : '🎯 '}${name} 的惩罚: ${punishText}`)
+    addMsg('result', `${name} 的惩罚: ${punishText}`)
     play('punishment')
     showNextRound.value = true
   })
@@ -246,11 +241,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="h-screen flex flex-col">
+  <div class="h-screen flex flex-col bg-cn-ink">
     <!-- Top bar -->
-    <div class="flex items-center justify-between px-4 py-2.5 border-b border-cn-gold/20 bg-cn-ink shrink-0">
-      <span class="text-cn-gold font-chinese text-base">第{{ roundNumber }}轮</span>
-      <span class="text-cn-cream/50 text-xs">{{ playerCount }}人</span>
+    <div class="flex items-center justify-between px-4 py-2.5 border-b border-cn-gold/10 bg-cn-surface/60 shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="text-cn-gold font-serif-cn text-base font-bold">第{{ roundNumber }}轮</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cn-cream/30"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="text-cn-cream/40 text-xs">{{ playerCount }}人</span>
+      </div>
     </div>
 
     <!-- Chat feed -->
@@ -263,24 +263,27 @@ onMounted(() => {
         v-if="gameStore.phase === 'rolling' && !hasRolled"
         class="px-4 py-3 flex justify-center"
       >
-        <button
-          class="w-full py-3 rounded-xl bg-cn-red border border-cn-gold text-cn-gold
-                 font-chinese text-lg active:bg-cn-dark-red transition-colors"
+        <Button
+          class="game-roll-btn"
+          size="large"
           @click="handleRoll"
         >
-          🎲 摇骰子
-        </button>
+          <span class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M16 8h.01"/><path d="M12 12h.01"/><path d="M8 16h.01"/></svg>
+            <span class="font-serif-cn text-lg">摇骰子</span>
+          </span>
+        </Button>
       </div>
 
-      <!-- Rolling phase: waiting for others (already rolled) -->
+      <!-- Rolling phase: waiting for others -->
       <div
         v-else-if="gameStore.phase === 'rolling' && hasRolled"
-        class="px-4 py-3 text-center"
+        class="px-4 py-4 text-center"
       >
-        <p class="text-cn-cream/40 text-sm">等待其他玩家摇骰子...</p>
+        <p class="text-cn-cream/30 text-sm">等待其他玩家摇骰子...</p>
       </div>
 
-      <!-- Bidding phase: my turn => BidInput -->
+      <!-- Bidding phase: my turn -->
       <div v-else-if="gameStore.phase === 'bidding' && isMyTurn">
         <BidInput
           :min-count="gameStore.currentBid ? gameStore.currentBid.count : 1"
@@ -295,22 +298,22 @@ onMounted(() => {
       <!-- Bidding phase: not my turn -->
       <div
         v-else-if="gameStore.phase === 'bidding' && !isMyTurn"
-        class="px-4 py-3 text-center"
+        class="px-4 py-4 text-center"
       >
-        <p class="text-cn-cream/50 font-chinese text-sm">
-          等待 {{ currentTurnName }} 叫点...
+        <p class="text-cn-cream/35 font-serif-cn text-sm">
+          等待 <span class="text-cn-gold/70">{{ currentTurnName }}</span> 叫点...
         </p>
       </div>
 
       <!-- Settling phase: next round button -->
       <div v-else-if="showNextRound" class="px-4 py-3">
-        <button
-          class="w-full py-3 rounded-xl bg-cn-gold text-cn-ink font-chinese
-                 text-lg font-bold active:opacity-80 transition-colors"
+        <Button
+          class="game-next-btn"
+          size="large"
           @click="handleNextRound"
         >
-          下一轮
-        </button>
+          <span class="font-serif-cn text-lg font-bold">下一轮</span>
+        </Button>
       </div>
     </div>
 
@@ -318,15 +321,16 @@ onMounted(() => {
     <div
       v-if="hasRolled && gameStore.phase !== 'rolling'"
       ref="eyeBtn"
-      class="fixed w-12 h-12 rounded-full bg-cn-wood border border-cn-gold/50
-             flex items-center justify-center text-xl shadow-lg z-40 select-none"
+      class="fixed w-12 h-12 rounded-full bg-cn-surface border border-cn-gold/40
+             flex items-center justify-center shadow-lg z-40 select-none cursor-pointer
+             animate-ring-glow"
       style="right: 12px; bottom: 100px; touch-action: none;"
       @touchstart.prevent="onEyeTouchStart"
       @touchmove.prevent="onEyeTouchMove"
       @touchend="onEyeTouchEnd"
       @mousedown.prevent="onEyeMouseDown"
     >
-      👁
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cn-gold"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
     </div>
 
     <!-- Dice viewer bottom sheet -->
@@ -337,3 +341,37 @@ onMounted(() => {
     />
   </div>
 </template>
+
+<style scoped>
+.game-roll-btn {
+  width: 100%;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #C41E2A 0%, #8B1A1A 100%);
+  border: 1px solid #D4A853;
+  color: #D4A853;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+.game-roll-btn:active {
+  transform: scale(0.97);
+  background: linear-gradient(135deg, #8B1A1A 0%, #6B1414 100%);
+}
+
+.game-next-btn {
+  width: 100%;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #D4A853 0%, #A68640 100%);
+  border: none;
+  color: #0F0F1A;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 200ms ease;
+  box-shadow: 0 4px 16px rgba(212, 168, 83, 0.25);
+}
+.game-next-btn:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+</style>
