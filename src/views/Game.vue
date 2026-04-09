@@ -193,7 +193,7 @@ onMounted(() => {
       mode: data.mode as 'fei' | 'zhai',
     })
     const name = getPlayerName(data.player_id)
-    const modeText = data.mode === 'fei' ? '飞' : '斋'
+    const modeText = data.mode === 'fei' ? '🎲飞' : '🔒斋'
     addMsg('bid', `${data.count}个${data.face} ${modeText}`, data.player_id, name)
   })
 
@@ -214,7 +214,7 @@ onMounted(() => {
     const bidderName = getPlayerName(bidder)
     addMsg('challenge', '', data.challenger, challengerName)
 
-    const modeText = data.bid?.mode === 'fei' ? '飞' : '斋'
+    const modeText = data.bid?.mode === 'fei' ? '🎲飞' : '🔒斋'
     const bidText = `${data.bid?.count}个${data.bid?.face} ${modeText}`
     const isMyWin = data.winner === myId.value
     const isMyLoss = data.loser === myId.value

@@ -56,8 +56,8 @@ const faceOptions: PickerOption[] = [
 ]
 
 const modeOptions: PickerOption[] = [
-  { text: '飞', value: 'fei' },
-  { text: '斋', value: 'zhai' },
+  { text: '🎲 飞', value: 'fei' },
+  { text: '🔒 斋', value: 'zhai' },
 ]
 
 const columns = computed(() => [countOptions.value, faceOptions, modeOptions])
@@ -86,7 +86,7 @@ function isBidValid() {
 }
 
 const canSubmit = computed(() => isBidValid() && count.value <= props.maxCount)
-const modeText = computed(() => mode.value === 'fei' ? '飞' : '斋')
+const modeText = computed(() => mode.value === 'fei' ? '🎲飞' : '🔒斋')
 </script>
 
 <template>
