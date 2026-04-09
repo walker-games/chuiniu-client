@@ -163,20 +163,25 @@ onMounted(() => {
 
     const modeText = data.bid?.mode === 'fei' ? '飞' : '斋'
     const bidText = `${data.bid?.count}个${data.bid?.face} ${modeText}`
+    const isMyWin = data.winner === myId.value
+    const isMyLoss = data.loser === myId.value
     const winnerName = getPlayerName(data.winner)
     const loserName = getPlayerName(data.loser)
+    const myEmoji = isMyWin ? ' 😎' : isMyLoss ? ' 😭' : ''
     addMsg(
       'result',
-      `${challengerName} 开 ${bidderName}\n叫点: ${bidText}\n实际: ${data.actual_count}个\n🏆 ${winnerName} 赢！🍺 ${loserName} 受罚`,
+      `${challengerName} 开 ${bidderName}\n叫点: ${bidText}\n实际: ${data.actual_count}个\n🏆 ${winnerName} 赢！🍺 ${loserName} 受罚${myEmoji}`,
     )
     play('challenge')
   })
 
   on('punishment', (msg: WSMessage) => {
     const data = msg.data as any
-    const name = getPlayerName(data.loser)
+    const loserId = data.loser
+    const name = getPlayerName(loserId)
+    const isMe = loserId === myId.value
     const punishText = typeof data.punishment === 'string' ? data.punishment : data.punishment?.text || '喝一杯'
-    addMsg('result', `🎯 ${name} 的惩罚: ${punishText}`)
+    addMsg('result', `${isMe ? '😭 ' : '🎯 '}${name} 的惩罚: ${punishText}`)
     play('punishment')
     showNextRound.value = true
   })
