@@ -44,3 +44,12 @@ export interface RoomSettings {
   dice_per_player: number
   punishments: Punishment[]
 }
+
+export interface ChatMessage {
+  id: string
+  type: 'system' | 'bid' | 'challenge' | 'result' | 'roll'
+  playerId?: string
+  playerName?: string
+  text: string
+  timestamp: number
+}
