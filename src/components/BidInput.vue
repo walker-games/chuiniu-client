@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { Picker, type PickerOption } from 'vant'
+import 'vant/es/picker/style'
 import type { Bid } from '@/types/game'
 
 const props = defineProps<{
@@ -9,7 +11,7 @@ const props = defineProps<{
   playerCount: number
 }>()
 
-const emit = defineEmits<{
+defineEmits<{
   bid: [payload: { count: number; face: number; mode: 'fei' | 'zhai' }]
   challenge: []
 }>()
@@ -35,110 +37,72 @@ const effectiveMinCount = computed(() => {
   return prev.count
 })
 
-function isFaceValid(f: number): boolean {
+// Picker columns
+const countOptions = computed<PickerOption[]>(() => {
+  const opts: PickerOption[] = []
+  for (let i = effectiveMinCount.value; i <= props.maxCount; i++) {
+    opts.push({ text: `${i}`, value: i })
+  }
+  return opts
+})
+
+const faceOptions: PickerOption[] = [
+  { text: '1', value: 1 },
+  { text: '2', value: 2 },
+  { text: '3', value: 3 },
+  { text: '4', value: 4 },
+  { text: '5', value: 5 },
+  { text: '6', value: 6 },
+]
+
+const modeOptions: PickerOption[] = [
+  { text: '飞', value: 'fei' },
+  { text: '斋', value: 'zhai' },
+]
+
+const columns = computed(() => [countOptions.value, faceOptions, modeOptions])
+
+const selectedValues = ref([count.value, face.value, mode.value])
+
+watch([count, face, mode], () => {
+  selectedValues.value = [count.value, face.value, mode.value]
+})
+
+function onChange({ selectedValues: vals }: { selectedValues: (string | number)[] }) {
+  count.value = Number(vals[0]) || 1
+  face.value = Number(vals[1]) || 1
+  mode.value = vals[2] as 'fei' | 'zhai'
+}
+
+function isBidValid() {
   if (!props.previousBid) return true
-  if (mode.value === props.previousBid.mode && count.value === props.previousBid.count) return f > props.previousBid.face
-  return true
-}
-
-function isCountValid(c: number): boolean {
-  return c >= effectiveMinCount.value && c <= props.maxCount
-}
-
-function fixFace() {
-  if (!isFaceValid(face.value)) {
-    const valid = [1,2,3,4,5,6].find(f => isFaceValid(f))
-    if (valid) face.value = valid
+  const prev = props.previousBid
+  if (mode.value === prev.mode) {
+    if (count.value > prev.count) return true
+    if (count.value === prev.count && face.value > prev.face) return true
+    return false
   }
+  return count.value >= effectiveMinCount.value
 }
 
-function changeCount(delta: number) {
-  const next = count.value + delta
-  if (isCountValid(next)) { count.value = next; fixFace() }
-}
-
-function changeFace(delta: number) {
-  let next = face.value + delta
-  for (let i = 0; i < 6; i++) {
-    if (next > 6) next = 1
-    if (next < 1) next = 6
-    if (isFaceValid(next)) { face.value = next; return }
-    next += delta
-  }
-}
-
-function toggleMode() {
-  mode.value = mode.value === 'fei' ? 'zhai' : 'fei'
-  if (count.value < effectiveMinCount.value) count.value = effectiveMinCount.value
-  if (count.value > props.maxCount) count.value = props.maxCount
-  fixFace()
-}
-
-// Touch swipe on count area
-let startY = 0
-function onCountTouchStart(e: TouchEvent) { startY = e.touches[0].clientY }
-function onCountTouchEnd(e: TouchEvent) {
-  const dy = startY - e.changedTouches[0].clientY
-  if (Math.abs(dy) > 20) changeCount(dy > 0 ? 1 : -1)
-}
-
-// Touch swipe on face area
-let startX = 0
-function onFaceTouchStart(e: TouchEvent) { startX = e.touches[0].clientX }
-function onFaceTouchEnd(e: TouchEvent) {
-  const dx = e.changedTouches[0].clientX - startX
-  if (Math.abs(dx) > 20) changeFace(dx > 0 ? 1 : -1)
-}
-
-const canSubmit = computed(() => isCountValid(count.value) && isFaceValid(face.value))
+const canSubmit = computed(() => isBidValid() && count.value <= props.maxCount)
 const modeText = computed(() => mode.value === 'fei' ? '飞' : '斋')
 </script>
 
 <template>
-  <div class="bg-cn-wood/90 border-t border-cn-gold/40 px-4 py-3">
-    <!-- Main selector: [count] 个 [face] [mode] -->
-    <div class="flex items-center justify-center gap-1 mb-3">
-      <!-- Count: swipe up/down -->
-      <div
-        class="select-none cursor-ns-resize"
-        @touchstart.prevent="onCountTouchStart"
-        @touchend="onCountTouchEnd"
-      >
-        <div class="text-[10px] text-cn-cream/30 text-center mb-0.5">↕滑动</div>
-        <div class="text-5xl font-bold text-cn-gold font-chinese min-w-14 text-center
-                    bg-cn-ink/40 rounded-xl px-3 py-2 border border-cn-gold/30">
-          {{ count }}
-        </div>
-      </div>
-
-      <span class="text-2xl text-cn-cream/60 font-chinese">个</span>
-
-      <!-- Face: swipe left/right -->
-      <div
-        class="select-none cursor-ew-resize"
-        @touchstart.prevent="onFaceTouchStart"
-        @touchend="onFaceTouchEnd"
-      >
-        <div class="text-[10px] text-cn-cream/30 text-center mb-0.5">↔滑动</div>
-        <div class="text-5xl font-bold font-chinese min-w-14 text-center
-                    bg-cn-ink/40 rounded-xl px-3 py-2 border border-cn-gold/30"
-             :class="face === 1 || face === 4 ? 'text-cn-red' : 'text-cn-cream'">
-          {{ face }}
-        </div>
-      </div>
-
-      <!-- Mode toggle -->
-      <button
-        class="ml-2 px-4 py-3 rounded-xl text-xl font-bold font-chinese transition-colors border-2"
-        :class="mode === 'fei'
-          ? 'bg-cn-red border-cn-red text-cn-cream'
-          : 'bg-cn-gold/20 border-cn-gold text-cn-gold'"
-        @click="toggleMode"
-      >{{ modeText }}</button>
-    </div>
+  <div class="bg-cn-wood/90 border-t border-cn-gold/40">
+    <!-- Vant Picker -->
+    <Picker
+      v-model="selectedValues"
+      :columns="columns"
+      :visible-option-num="3"
+      :option-height="40"
+      :show-toolbar="false"
+      @change="onChange"
+    />
 
     <!-- Action buttons -->
-    <div class="flex gap-2">
+    <div class="flex gap-2 px-4 pb-3">
       <button
         class="flex-1 py-3 rounded-xl bg-cn-red border-2 border-cn-gold text-cn-gold
                font-chinese text-xl active:bg-cn-dark-red transition-colors
@@ -155,3 +119,23 @@ const modeText = computed(() => mode.value === 'fei' ? '飞' : '斋')
     </div>
   </div>
 </template>
+
+<style scoped>
+:deep(.van-picker) {
+  background: transparent !important;
+}
+:deep(.van-picker__mask) {
+  background: linear-gradient(180deg, rgba(26,26,26,0.8), rgba(26,26,26,0) 30%, rgba(26,26,26,0) 70%, rgba(26,26,26,0.8)) !important;
+}
+:deep(.van-picker__frame) {
+  border-color: rgba(212, 168, 83, 0.3) !important;
+}
+:deep(.van-picker-column__item) {
+  color: rgba(245, 230, 200, 0.5) !important;
+}
+:deep(.van-picker-column__item--selected) {
+  color: #D4A853 !important;
+  font-weight: bold;
+  font-size: 18px;
+}
+</style>
