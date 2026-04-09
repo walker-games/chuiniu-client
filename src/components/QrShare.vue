@@ -15,8 +15,8 @@ const botName = import.meta.env.VITE_TG_BOT_NAME || 'WalkerLearnBot'
 const link = ref('')
 
 function updateLink() {
-  // Deep link into CardLottery with chuiniu_ prefix so it auto-opens in iframe
-  link.value = `https://t.me/${botName}?startapp=chuiniu_${props.inviteCode}`
+  // Direct link to chuiniu Mini App with invite code
+  link.value = `https://t.me/${botName}/chuiniu?startapp=${props.inviteCode}`
 }
 
 async function renderQR() {
