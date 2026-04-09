@@ -16,6 +16,7 @@ const { connect, send, on } = useWebSocket()
 
 const roomId = route.params.roomId as string
 const isReady = ref(false)
+const entering = ref(false)
 const maxSeats = 8
 
 const players = computed(() => roomStore.room?.players ?? [])
@@ -50,7 +51,8 @@ onMounted(() => {
   })
 
   on('game_start', () => {
-    router.push(`/game/${roomId}`)
+    entering.value = true
+    setTimeout(() => router.push(`/game/${roomId}`), 500)
   })
 })
 </script>
@@ -83,9 +85,16 @@ onMounted(() => {
       <QrShare :invite-code="inviteCode" />
     </div>
 
+    <!-- Entering overlay -->
+    <div v-if="entering" class="fixed inset-0 z-50 bg-cn-ink/90 flex flex-col items-center justify-center">
+      <div class="w-8 h-8 border-2 border-cn-gold/30 border-t-cn-gold rounded-full animate-spin mb-4" />
+      <p class="text-cn-gold font-chinese text-xl">进入游戏中...</p>
+    </div>
+
     <!-- Ready button -->
     <div class="mt-auto flex justify-center pb-6">
       <button
+        v-if="!entering"
         class="w-full max-w-64 py-3.5 rounded-xl font-chinese text-xl tracking-wider
                transition-colors border-2"
         :class="isReady
