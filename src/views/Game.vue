@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useWebSocket } from '@/composables/useWebSocket'
 import { useAuthStore } from '@/stores/auth'
 import { useRoomStore } from '@/stores/room'
@@ -11,16 +11,9 @@ import BidInput from '@/components/BidInput.vue'
 import DiceViewer from '@/components/DiceViewer.vue'
 import type { WSMessage } from '@/types/ws'
 import type { ChatMessage } from '@/types/game'
-import type {
-  RollResultData,
-  BidMadeData,
-  TurnChangeData,
-  ChallengeResultData,
-  PunishmentData,
-} from '@/types/ws'
+import type { RollResultData } from '@/types/ws'
 
 const route = useRoute()
-const router = useRouter()
 const authStore = useAuthStore()
 const roomStore = useRoomStore()
 const gameStore = useGameStore()
@@ -76,10 +69,11 @@ function handleChallenge() {
 
 function handleNextRound() {
   gameStore.reset()
-  messages.value = []
   hasRolled.value = false
   showNextRound.value = false
-  router.push(`/lobby/${roomId}`)
+  addMsg('system', '--- 新一轮 ---')
+  // Stay on game page, just reset state. Server will handle new round when all ready.
+  send('ready', { ready: true })
 }
 
 onMounted(() => {
@@ -122,6 +116,14 @@ onMounted(() => {
     hasRolled.value = true
     play('reveal')
     addMsg('roll', '', myId.value, '我')
+  })
+
+  on('game_start', () => {
+    // New round started — reset local state
+    gameStore.reset()
+    hasRolled.value = false
+    showNextRound.value = false
+    addMsg('system', `第${roundNumber.value}轮开始！`)
   })
 
   on('all_rolled', () => {
@@ -246,10 +248,10 @@ onMounted(() => {
       <div v-else-if="showNextRound" class="px-4 py-3">
         <button
           class="w-full py-3 rounded-xl bg-cn-gold text-cn-ink font-chinese
-                 text-lg font-bold active:bg-cn-gold-dim transition-colors"
+                 text-lg font-bold active:opacity-80 transition-colors"
           @click="handleNextRound"
         >
-          返回大厅
+          下一轮
         </button>
       </div>
     </div>
