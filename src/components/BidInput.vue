@@ -56,8 +56,8 @@ const faceOptions: PickerOption[] = [
 ]
 
 const modeOptions: PickerOption[] = [
-  { text: '飞', value: 'fei' },
-  { text: '斋', value: 'zhai' },
+  { text: '飛', value: 'fei' },
+  { text: '齋', value: 'zhai' },
 ]
 
 const columns = computed(() => [countOptions.value, faceOptions, modeOptions])
@@ -86,7 +86,7 @@ function isBidValid() {
 }
 
 const canSubmit = computed(() => isBidValid() && count.value <= props.maxCount)
-const modeText = computed(() => mode.value === 'fei' ? '飞' : '斋')
+const modeText = computed(() => mode.value === 'fei' ? '飛' : '齋')
 </script>
 
 <template>
@@ -108,14 +108,14 @@ const modeText = computed(() => mode.value === 'fei' ? '飞' : '斋')
         :disabled="!canSubmit"
         @click="$emit('bid', { count, face, mode })"
       >
-        <span class="font-serif-cn text-lg">叫! {{ count }}个{{ face }} {{ modeText }}</span>
+        <span class="font-serif-cn text-lg">叫! {{ count }}個{{ face }} {{ modeText }}</span>
       </Button>
       <Button
         v-if="previousBid"
         class="bid-challenge-btn"
         @click="$emit('challenge')"
       >
-        <span class="font-serif-cn text-lg font-bold">开!</span>
+        <span class="font-serif-cn text-lg font-bold">開!</span>
       </Button>
     </div>
   </div>

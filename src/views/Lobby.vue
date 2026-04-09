@@ -63,7 +63,7 @@ onMounted(() => {
     <!-- Header -->
     <div class="mb-6 animate-fade-up">
       <div class="flex items-center gap-2 mb-1">
-        <span class="text-cn-muted text-xs">房间</span>
+        <span class="text-cn-muted text-xs">房間</span>
         <span class="text-cn-gold font-serif-cn text-lg font-bold tracking-wider">{{ roomId.slice(0, 6) }}</span>
       </div>
       <p class="text-cn-muted text-xs tracking-wider">等待玩家加入...</p>
@@ -94,7 +94,7 @@ onMounted(() => {
     <!-- Entering overlay -->
     <div v-if="entering" class="fixed inset-0 z-50 bg-cn-ink/95 flex flex-col items-center justify-center">
       <div class="w-10 h-10 border-2 border-cn-gold/30 border-t-cn-gold rounded-full animate-spin mb-4" />
-      <p class="text-cn-gold font-serif-cn text-xl">进入游戏中...</p>
+      <p class="text-cn-gold font-serif-cn text-xl">進入遊戲中...</p>
     </div>
 
     <!-- Ready button -->
@@ -106,7 +106,7 @@ onMounted(() => {
         size="large"
         @click="toggleReady"
       >
-        <span class="font-serif-cn text-xl tracking-wider">{{ isReady ? '取消准备' : '准 备' }}</span>
+        <span class="font-serif-cn text-xl tracking-wider">{{ isReady ? '取消準備' : '準 備' }}</span>
       </Button>
     </div>
   </div>

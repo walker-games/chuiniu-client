@@ -35,8 +35,8 @@ const targetName = computed(() => {
 const bidText = computed(() => {
   const bid = result.value?.bid
   if (!bid) return ''
-  const modeText = bid.mode === 'fei' ? '飞' : '斋'
-  return `${bid.count}个${bid.face} ${modeText}`
+  const modeText = bid.mode === 'fei' ? '飛' : '齋'
+  return `${bid.count}個${bid.face} ${modeText}`
 })
 
 const loserName = computed(() => {
@@ -74,7 +74,7 @@ onMounted(() => {
 <template>
   <div class="min-h-screen flex flex-col px-4 py-6 bg-pattern">
     <!-- Header -->
-    <h1 class="result-title font-serif-cn text-center mb-6 font-bold animate-fade-up">开奖!</h1>
+    <h1 class="result-title font-serif-cn text-center mb-6 font-bold animate-fade-up">開獎!</h1>
 
     <template v-if="result">
       <!-- Challenge info -->
@@ -84,7 +84,7 @@ onMounted(() => {
           <span class="text-cn-gold font-serif-cn text-lg font-bold">{{ bidText }}</span>
         </p>
         <p class="text-cn-cream/50 text-sm">
-          <span class="text-cn-red font-serif-cn font-bold">{{ challengerName }}</span> 开了!
+          <span class="text-cn-red font-serif-cn font-bold">{{ challengerName }}</span> 開了!
         </p>
       </div>
 
@@ -107,7 +107,7 @@ onMounted(() => {
 
       <!-- Actual count -->
       <div class="mb-4 animate-fade-up stagger-3">
-        <span class="text-cn-muted text-sm">实际数量:</span>
+        <span class="text-cn-muted text-sm">實際數量:</span>
         <span class="text-cn-gold font-serif-cn text-2xl font-bold ml-2">{{ result.actualCount }}</span>
       </div>
 
@@ -117,7 +117,7 @@ onMounted(() => {
           class="font-serif-cn text-2xl font-bold"
           :class="isWinner ? 'text-cn-gold' : 'text-cn-red'"
         >
-          {{ isWinner ? '你赢了!' : '你输了...' }}
+          {{ isWinner ? '你贏了!' : '你輸了...' }}
         </p>
       </div>
     </template>
@@ -129,7 +129,7 @@ onMounted(() => {
         size="large"
         @click="nextRound"
       >
-        <span class="font-serif-cn text-xl tracking-wider">下一轮</span>
+        <span class="font-serif-cn text-xl tracking-wider">下一輪</span>
       </Button>
     </div>
 

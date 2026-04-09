@@ -35,7 +35,7 @@ watch(
       <!-- roll message -->
       <div v-else-if="msg.type === 'roll'" class="flex items-center gap-1.5 py-0.5">
         <span class="text-cn-cream/45 text-[0.8125rem] font-bold">{{ msg.playerName }}</span>
-        <span class="text-cn-muted text-xs">已摇</span>
+        <span class="text-cn-muted text-xs">已搖</span>
         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-cn-gold/50"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
 
@@ -48,7 +48,7 @@ watch(
       <!-- challenge message -->
       <div v-else-if="msg.type === 'challenge'" class="flex items-center gap-1.5 py-1.5">
         <span class="text-cn-red text-lg font-bold font-serif-cn">
-          {{ msg.playerName }}: 开!
+          {{ msg.playerName }}: 開!
         </span>
       </div>
 
@@ -59,9 +59,9 @@ watch(
       >
         <div class="space-y-1">
           <template v-for="(line, i) in msg.text.split('\n')" :key="i">
-            <p v-if="line.includes('赢')" class="text-cn-gold font-bold font-serif-cn text-sm">{{ line }}</p>
-            <p v-else-if="line.includes('惩罚')" class="text-cn-red font-serif-cn text-sm">{{ line }}</p>
-            <p v-else-if="line.includes('叫点')" class="text-cn-gold/70 text-sm">{{ line }}</p>
+            <p v-if="line.includes('贏')" class="text-cn-gold font-bold font-serif-cn text-sm">{{ line }}</p>
+            <p v-else-if="line.includes('懲罰')" class="text-cn-red font-serif-cn text-sm">{{ line }}</p>
+            <p v-else-if="line.includes('叫點')" class="text-cn-gold/70 text-sm">{{ line }}</p>
             <p v-else class="text-cn-cream/60 text-sm leading-relaxed">{{ line }}</p>
           </template>
         </div>

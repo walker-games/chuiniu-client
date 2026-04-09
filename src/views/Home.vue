@@ -45,7 +45,7 @@ async function handleCreate() {
     const res = await createRoom(authStore.user?.name)
     router.push(`/lobby/${res.room_id}`)
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : '创建房间失败'
+    error.value = e instanceof Error ? e.message : '創建房間失敗'
   } finally {
     loading.value = false
   }
@@ -54,7 +54,7 @@ async function handleCreate() {
 async function handleJoin(code?: string) {
   const joinCode = code || inviteCode.value.trim()
   if (!joinCode) {
-    error.value = '请输入邀请码'
+    error.value = '請輸入邀請碼'
     return
   }
   error.value = ''
@@ -63,7 +63,7 @@ async function handleJoin(code?: string) {
     const res = await joinRoom(joinCode, authStore.user?.name)
     router.push(`/lobby/${res.room_id}`)
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : '加入房间失败'
+    error.value = e instanceof Error ? e.message : '加入房間失敗'
   } finally {
     loading.value = false
   }
@@ -88,7 +88,7 @@ onMounted(async () => {
       吹牛骰子
     </h1>
     <p class="text-cn-muted text-sm mb-12 tracking-[0.3em] font-serif-cn animate-fade-up stagger-1">
-      港式骰盅 &middot; 派对必备
+      港式骰盅 &middot; 派對必備
     </p>
 
     <!-- Error -->
@@ -101,7 +101,7 @@ onMounted(async () => {
       class="home-btn-create animate-fade-up stagger-2"
       size="large"
       :loading="loading"
-      loading-text="创建中..."
+      loading-text="創建中..."
       @click="handleCreate"
     >
       <span class="font-serif-cn text-2xl tracking-wider">开 桌</span>
@@ -119,7 +119,7 @@ onMounted(async () => {
       <input
         v-model="inviteCode"
         type="text"
-        placeholder="输入邀请码"
+        placeholder="輸入邀請碼"
         class="w-full px-4 py-3 rounded-xl bg-cn-surface border border-cn-cream/8
                text-cn-cream placeholder-cn-muted text-center text-lg
                focus:outline-none focus:border-cn-gold/40
@@ -143,7 +143,7 @@ onMounted(async () => {
              animate-fade-up stagger-5"
       @click="router.push('/history')"
     >
-      查看战绩
+      查看戰績
     </button>
   </div>
 </template>

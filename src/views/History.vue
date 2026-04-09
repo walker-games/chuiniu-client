@@ -24,7 +24,7 @@ const players = computed(() => {
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         返回
       </button>
-      <h1 class="history-title flex-1 text-center font-serif-cn text-cn-gold font-bold">战绩</h1>
+      <h1 class="history-title flex-1 text-center font-serif-cn text-cn-gold font-bold">戰績</h1>
       <div class="w-11" />
     </div>
 
@@ -66,7 +66,7 @@ const players = computed(() => {
     <!-- Empty state -->
     <div v-else class="flex-1 flex flex-col items-center justify-center gap-3">
       <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-cn-cream/8"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M16 8h.01"/><path d="M12 12h.01"/><path d="M8 16h.01"/></svg>
-      <p class="text-cn-muted font-serif-cn text-lg">暂无战绩</p>
+      <p class="text-cn-muted font-serif-cn text-lg">暫無戰績</p>
     </div>
   </div>
 </template>

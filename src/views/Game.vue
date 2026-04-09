@@ -126,7 +126,7 @@ function handleNextRound() {
   gameStore.reset()
   hasRolled.value = false
   showNextRound.value = false
-  addMsg('system', '--- 新一轮 ---')
+  addMsg('system', '--- 新一輪 ---')
   send('ready', { ready: true })
 }
 
@@ -134,7 +134,7 @@ onMounted(() => {
   initAudio()
   connect(roomId, authStore.token, authStore.user?.name)
 
-  addMsg('system', '进入房间，等待游戏开始...')
+  addMsg('system', '進入房間，等待遊戲開始...')
 
   on('room_state', (msg: WSMessage) => {
     console.log('[Game] room_state received, phase:', (msg.data as any)?.round?.phase, 'players:', (msg.data as any)?.players?.length)
@@ -175,12 +175,12 @@ onMounted(() => {
     gameStore.reset()
     hasRolled.value = false
     showNextRound.value = false
-    addMsg('system', `第${roundNumber.value}轮开始!`)
+    addMsg('system', `第${roundNumber.value}輪開始!`)
   })
 
   on('all_rolled', () => {
     gameStore.setPhase('bidding')
-    addMsg('system', '全部就绪，开始叫点!')
+    addMsg('system', '全部就緒，開始叫點!')
   })
 
   on('bid_made', (msg: WSMessage) => {
@@ -192,8 +192,8 @@ onMounted(() => {
       mode: data.mode as 'fei' | 'zhai',
     })
     const name = getPlayerName(data.player_id)
-    const modeText = data.mode === 'fei' ? '飞' : '斋'
-    addMsg('bid', `${data.count}个${data.face} ${modeText}`, data.player_id, name)
+    const modeText = data.mode === 'fei' ? '飛' : '齋'
+    addMsg('bid', `${data.count}個${data.face} ${modeText}`, data.player_id, name)
   })
 
   on('turn_change', (msg: WSMessage) => {
@@ -201,7 +201,7 @@ onMounted(() => {
     const turnId = data.turn_player_id || data.playerId
     gameStore.setTurn(turnId)
     const name = getPlayerName(turnId)
-    addMsg('system', `轮到 ${name}`)
+    addMsg('system', `輪到 ${name}`)
   })
 
   on('challenge_result', (msg: WSMessage) => {
@@ -213,13 +213,13 @@ onMounted(() => {
     const bidderName = getPlayerName(bidder)
     addMsg('challenge', '', data.challenger, challengerName)
 
-    const modeText = data.bid?.mode === 'fei' ? '飞' : '斋'
-    const bidText = `${data.bid?.count}个${data.bid?.face} ${modeText}`
+    const modeText = data.bid?.mode === 'fei' ? '飛' : '齋'
+    const bidText = `${data.bid?.count}個${data.bid?.face} ${modeText}`
     const winnerName = getPlayerName(data.winner)
     const loserName = getPlayerName(data.loser)
     addMsg(
       'result',
-      `${challengerName} 开 ${bidderName}\n叫点: ${bidText}\n实际: ${data.actual_count}个\n${winnerName} 赢! ${loserName} 受罚`,
+      `${challengerName} 開 ${bidderName}\n叫點: ${bidText}\n實際: ${data.actual_count}個\n${winnerName} 贏! ${loserName} 受罰`,
     )
     play('challenge')
   })
@@ -228,8 +228,8 @@ onMounted(() => {
     const data = msg.data as any
     const loserId = data.loser
     const name = getPlayerName(loserId)
-    const punishText = typeof data.punishment === 'string' ? data.punishment : data.punishment?.text || '喝一杯'
-    addMsg('result', `${name} 的惩罚: ${punishText}`)
+    const punishText = typeof data.punishment === 'string' ? data.punishment : data.punishment?.text || '飲一杯'
+    addMsg('result', `${name} 的懲罰: ${punishText}`)
     play('punishment')
     showNextRound.value = true
   })
@@ -245,7 +245,7 @@ onMounted(() => {
     <!-- Top bar -->
     <div class="flex items-center justify-between px-4 py-2.5 border-b border-cn-gold/8 bg-cn-surface/60 shrink-0">
       <div class="flex items-center gap-2">
-        <span class="text-cn-gold font-serif-cn text-base font-bold">第{{ roundNumber }}轮</span>
+        <span class="text-cn-gold font-serif-cn text-base font-bold">第{{ roundNumber }}輪</span>
       </div>
       <div class="flex items-center gap-1.5">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cn-muted"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -270,7 +270,7 @@ onMounted(() => {
         >
           <span class="flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M16 8h.01"/><path d="M12 12h.01"/><path d="M8 16h.01"/></svg>
-            <span class="font-serif-cn text-lg">摇骰子</span>
+            <span class="font-serif-cn text-lg">搖骰子</span>
           </span>
         </Button>
       </div>
@@ -280,7 +280,7 @@ onMounted(() => {
         v-else-if="gameStore.phase === 'rolling' && hasRolled"
         class="px-4 py-4"
       >
-        <p class="text-cn-muted text-xs pl-3">等待其他玩家摇骰子...</p>
+        <p class="text-cn-muted text-xs pl-3">等待其他玩家搖骰子...</p>
       </div>
 
       <!-- Bidding phase: my turn -->
@@ -301,7 +301,7 @@ onMounted(() => {
         class="px-4 py-4"
       >
         <p class="text-cn-muted font-serif-cn text-sm pl-3">
-          等待 <span class="text-cn-gold/70">{{ currentTurnName }}</span> 叫点...
+          等待 <span class="text-cn-gold/70">{{ currentTurnName }}</span> 叫點...
         </p>
       </div>
 
@@ -312,7 +312,7 @@ onMounted(() => {
           size="large"
           @click="handleNextRound"
         >
-          <span class="font-serif-cn text-lg font-bold">下一轮</span>
+          <span class="font-serif-cn text-lg font-bold">下一輪</span>
         </Button>
       </div>
     </div>

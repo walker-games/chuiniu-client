@@ -21,7 +21,7 @@ const emit = defineEmits<{
       <div class="text-xl text-cn-red font-serif-cn font-bold">
         {{ loserName }}
       </div>
-      <div class="text-sm text-cn-muted mt-4">点击关闭</div>
+      <div class="text-sm text-cn-muted mt-4">點擊關閉</div>
     </div>
   </div>
 </template>
