@@ -61,21 +61,23 @@ onMounted(() => {
 <template>
   <div class="min-h-screen flex flex-col px-4 py-6 bg-pattern">
     <!-- Header -->
-    <div class="text-center mb-6">
-      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card">
-        <span class="text-cn-gold/60 text-xs">房间</span>
+    <div class="mb-6 animate-fade-up">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="text-cn-muted text-xs">房间</span>
         <span class="text-cn-gold font-serif-cn text-lg font-bold tracking-wider">{{ roomId.slice(0, 6) }}</span>
       </div>
-      <p class="text-cn-cream/30 text-xs mt-2 tracking-wider">等待玩家加入...</p>
+      <p class="text-cn-muted text-xs tracking-wider">等待玩家加入...</p>
     </div>
 
     <!-- Player row -->
-    <div class="flex gap-2.5 justify-center flex-wrap mb-4">
+    <div class="flex gap-2.5 justify-center flex-wrap mb-4 animate-fade-up stagger-1">
       <PlayerSeat
-        v-for="p in players"
+        v-for="(p, idx) in players"
         :key="p.id"
         :player="p"
         :is-host="p.id === roomStore.room?.host"
+        :style="{ animationDelay: `${idx * 50}ms` }"
+        class="animate-fade-up"
       />
       <PlayerSeat
         v-for="i in emptySeats"
@@ -85,18 +87,18 @@ onMounted(() => {
     </div>
 
     <!-- QR Share -->
-    <div class="flex justify-center mb-8">
+    <div class="flex justify-center mb-8 animate-fade-up stagger-2">
       <QrShare :invite-code="inviteCode" />
     </div>
 
     <!-- Entering overlay -->
     <div v-if="entering" class="fixed inset-0 z-50 bg-cn-ink/95 flex flex-col items-center justify-center">
       <div class="w-10 h-10 border-2 border-cn-gold/30 border-t-cn-gold rounded-full animate-spin mb-4" />
-      <p class="text-gold-gradient font-serif-cn text-xl">进入游戏中...</p>
+      <p class="text-cn-gold font-serif-cn text-xl">进入游戏中...</p>
     </div>
 
     <!-- Ready button -->
-    <div class="mt-auto flex justify-center pb-6">
+    <div class="mt-auto flex justify-center pb-6 animate-fade-up stagger-3">
       <Button
         v-if="!entering"
         class="lobby-ready-btn"
@@ -116,21 +118,20 @@ onMounted(() => {
   max-width: 256px;
   height: 52px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #C41E2A 0%, #8B1A1A 100%);
-  border: 2px solid #D4A853;
-  color: #D4A853;
+  background: oklch(48% 0.2 25);
+  border: 1.5px solid oklch(72% 0.14 75 / 0.3);
+  color: oklch(72% 0.14 75);
   font-weight: bold;
   cursor: pointer;
-  transition: all 200ms ease;
-  box-shadow: 0 4px 16px rgba(196, 30, 42, 0.3);
+  transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1), opacity 100ms;
 }
 .lobby-ready-btn:active {
   transform: scale(0.97);
+  opacity: 0.85;
 }
 .lobby-ready-btn--active {
-  background: rgba(26, 26, 46, 0.5);
-  border-color: rgba(245, 230, 200, 0.2);
-  color: rgba(245, 230, 200, 0.4);
-  box-shadow: none;
+  background: oklch(15% 0.02 60 / 0.5);
+  border-color: oklch(92% 0.03 75 / 0.15);
+  color: oklch(92% 0.03 75 / 0.35);
 }
 </style>

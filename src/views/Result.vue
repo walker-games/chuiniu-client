@@ -74,11 +74,11 @@ onMounted(() => {
 <template>
   <div class="min-h-screen flex flex-col px-4 py-6 bg-pattern">
     <!-- Header -->
-    <h1 class="text-3xl font-serif-cn text-gold-gradient text-center mb-6 font-bold">开奖!</h1>
+    <h1 class="result-title font-serif-cn text-center mb-6 font-bold animate-fade-up">开奖!</h1>
 
     <template v-if="result">
       <!-- Challenge info -->
-      <div class="text-center mb-4 py-3 glass-card px-4 space-y-1">
+      <div class="mb-4 py-3 surface-card px-4 space-y-1 animate-fade-up stagger-1">
         <p class="text-cn-cream/50 text-sm">
           <span class="text-cn-gold font-serif-cn">{{ targetName }}</span> 叫:
           <span class="text-cn-gold font-serif-cn text-lg font-bold">{{ bidText }}</span>
@@ -89,14 +89,14 @@ onMounted(() => {
       </div>
 
       <!-- All dice revealed -->
-      <div class="space-y-3 mb-6">
+      <div class="space-y-3 mb-6 animate-fade-up stagger-2">
         <div
           v-for="(dice, playerId) in result.allDice"
           :key="playerId"
-          class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
-          :class="playerId === result.loser ? 'bg-cn-red/10 border border-cn-red/20' : 'glass-card'"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl"
+          :class="playerId === result.loser ? 'bg-cn-red/8 border border-cn-red/15' : 'surface-card'"
         >
-          <span class="text-sm text-cn-cream/70 min-w-14 truncate font-serif-cn">
+          <span class="text-sm text-cn-cream/60 min-w-14 truncate font-serif-cn">
             {{ getPlayerName(playerId as string) }}
           </span>
           <div class="flex gap-1.5 flex-wrap">
@@ -106,16 +106,16 @@ onMounted(() => {
       </div>
 
       <!-- Actual count -->
-      <div class="text-center mb-4">
-        <span class="text-cn-cream/40 text-sm">实际数量:</span>
+      <div class="mb-4 animate-fade-up stagger-3">
+        <span class="text-cn-muted text-sm">实际数量:</span>
         <span class="text-cn-gold font-serif-cn text-2xl font-bold ml-2">{{ result.actualCount }}</span>
       </div>
 
       <!-- Win/lose -->
-      <div class="text-center mb-8">
+      <div class="mb-8 animate-fade-up stagger-4">
         <p
           class="font-serif-cn text-2xl font-bold"
-          :class="isWinner ? 'text-gold-gradient' : 'text-cn-red'"
+          :class="isWinner ? 'text-cn-gold' : 'text-cn-red'"
         >
           {{ isWinner ? '你赢了!' : '你输了...' }}
         </p>
@@ -144,20 +144,25 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.result-title {
+  font-size: clamp(1.75rem, 6vw, 2.5rem);
+  color: oklch(72% 0.14 75);
+}
+
 .result-next-btn {
   width: 100%;
   max-width: 256px;
   height: 52px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #C41E2A 0%, #8B1A1A 100%);
-  border: 2px solid #D4A853;
-  color: #D4A853;
+  background: oklch(48% 0.2 25);
+  border: 1.5px solid oklch(72% 0.14 75 / 0.3);
+  color: oklch(72% 0.14 75);
   font-weight: bold;
   cursor: pointer;
-  transition: all 200ms ease;
-  box-shadow: 0 4px 16px rgba(196, 30, 42, 0.3);
+  transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1), opacity 100ms;
 }
 .result-next-btn:active {
   transform: scale(0.97);
+  opacity: 0.85;
 }
 </style>

@@ -243,13 +243,13 @@ onMounted(() => {
 <template>
   <div class="h-screen flex flex-col bg-cn-ink">
     <!-- Top bar -->
-    <div class="flex items-center justify-between px-4 py-2.5 border-b border-cn-gold/10 bg-cn-surface/60 shrink-0">
+    <div class="flex items-center justify-between px-4 py-2.5 border-b border-cn-gold/8 bg-cn-surface/60 shrink-0">
       <div class="flex items-center gap-2">
         <span class="text-cn-gold font-serif-cn text-base font-bold">第{{ roundNumber }}轮</span>
       </div>
       <div class="flex items-center gap-1.5">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cn-cream/30"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span class="text-cn-cream/40 text-xs">{{ playerCount }}人</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cn-muted"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="text-cn-muted text-xs">{{ playerCount }}人</span>
       </div>
     </div>
 
@@ -278,9 +278,9 @@ onMounted(() => {
       <!-- Rolling phase: waiting for others -->
       <div
         v-else-if="gameStore.phase === 'rolling' && hasRolled"
-        class="px-4 py-4 text-center"
+        class="px-4 py-4"
       >
-        <p class="text-cn-cream/30 text-sm">等待其他玩家摇骰子...</p>
+        <p class="text-cn-muted text-xs pl-3">等待其他玩家摇骰子...</p>
       </div>
 
       <!-- Bidding phase: my turn -->
@@ -298,9 +298,9 @@ onMounted(() => {
       <!-- Bidding phase: not my turn -->
       <div
         v-else-if="gameStore.phase === 'bidding' && !isMyTurn"
-        class="px-4 py-4 text-center"
+        class="px-4 py-4"
       >
-        <p class="text-cn-cream/35 font-serif-cn text-sm">
+        <p class="text-cn-muted font-serif-cn text-sm pl-3">
           等待 <span class="text-cn-gold/70">{{ currentTurnName }}</span> 叫点...
         </p>
       </div>
@@ -321,9 +321,8 @@ onMounted(() => {
     <div
       v-if="hasRolled && gameStore.phase !== 'rolling'"
       ref="eyeBtn"
-      class="fixed w-12 h-12 rounded-full bg-cn-surface border border-cn-gold/40
-             flex items-center justify-center shadow-lg z-40 select-none cursor-pointer
-             animate-ring-glow"
+      class="fixed w-12 h-12 rounded-full bg-cn-surface border border-cn-gold/25
+             flex items-center justify-center z-40 select-none cursor-pointer"
       style="right: 12px; bottom: 100px; touch-action: none;"
       @touchstart.prevent="onEyeTouchStart"
       @touchmove.prevent="onEyeTouchMove"
@@ -347,28 +346,27 @@ onMounted(() => {
   width: 100%;
   height: 48px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #C41E2A 0%, #8B1A1A 100%);
-  border: 1px solid #D4A853;
-  color: #D4A853;
+  background: oklch(48% 0.2 25);
+  border: 1px solid oklch(72% 0.14 75 / 0.25);
+  color: oklch(72% 0.14 75);
   cursor: pointer;
-  transition: all 200ms ease;
+  transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1), opacity 100ms;
 }
 .game-roll-btn:active {
   transform: scale(0.97);
-  background: linear-gradient(135deg, #8B1A1A 0%, #6B1414 100%);
+  opacity: 0.85;
 }
 
 .game-next-btn {
   width: 100%;
   height: 48px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #D4A853 0%, #A68640 100%);
+  background: oklch(72% 0.14 75);
   border: none;
-  color: #0F0F1A;
+  color: oklch(10% 0.02 60);
   font-weight: bold;
   cursor: pointer;
-  transition: all 200ms ease;
-  box-shadow: 0 4px 16px rgba(212, 168, 83, 0.25);
+  transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1), opacity 100ms;
 }
 .game-next-btn:active {
   transform: scale(0.97);

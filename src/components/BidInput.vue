@@ -90,7 +90,7 @@ const modeText = computed(() => mode.value === 'fei' ? '飞' : '斋')
 </script>
 
 <template>
-  <div class="bg-cn-surface/90 border-t border-cn-gold/15">
+  <div class="bg-cn-surface/90 border-t border-cn-gold/10">
     <!-- Vant Picker -->
     <Picker
       v-model="selectedValues"
@@ -115,10 +115,7 @@ const modeText = computed(() => mode.value === 'fei' ? '飞' : '斋')
         class="bid-challenge-btn"
         @click="$emit('challenge')"
       >
-        <span class="flex items-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><line x1="16" x2="20" y1="16" y2="20"/><line x1="19" x2="21" y1="21" y2="19"/></svg>
-          <span class="font-serif-cn text-lg font-bold">开!</span>
-        </span>
+        <span class="font-serif-cn text-lg font-bold">开!</span>
       </Button>
     </div>
   </div>
@@ -129,18 +126,18 @@ const modeText = computed(() => mode.value === 'fei' ? '飞' : '斋')
   flex: 1;
   height: 48px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #C41E2A 0%, #8B1A1A 100%);
-  border: 1.5px solid #D4A853;
-  color: #D4A853;
+  background: oklch(48% 0.2 25);
+  border: 1px solid oklch(72% 0.14 75 / 0.2);
+  color: oklch(72% 0.14 75);
   cursor: pointer;
-  transition: all 200ms ease;
+  transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1), opacity 100ms;
 }
 .bid-submit-btn:active {
   transform: scale(0.97);
-  background: linear-gradient(135deg, #8B1A1A 0%, #6B1414 100%);
+  opacity: 0.85;
 }
 .bid-submit-btn:disabled {
-  opacity: 0.3;
+  opacity: 0.25;
   cursor: not-allowed;
 }
 
@@ -148,13 +145,12 @@ const modeText = computed(() => mode.value === 'fei' ? '飞' : '斋')
   padding: 0 24px;
   height: 48px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #D4A853 0%, #A68640 100%);
+  background: oklch(72% 0.14 75);
   border: none;
-  color: #0F0F1A;
+  color: oklch(10% 0.02 60);
   font-weight: bold;
   cursor: pointer;
-  transition: all 200ms ease;
-  box-shadow: 0 2px 12px rgba(212, 168, 83, 0.25);
+  transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1), opacity 100ms;
 }
 .bid-challenge-btn:active {
   transform: scale(0.97);
@@ -165,16 +161,16 @@ const modeText = computed(() => mode.value === 'fei' ? '飞' : '斋')
   background: transparent !important;
 }
 :deep(.van-picker__mask) {
-  background: linear-gradient(180deg, rgba(15,15,26,0.85), rgba(15,15,26,0) 30%, rgba(15,15,26,0) 70%, rgba(15,15,26,0.85)) !important;
+  background: linear-gradient(180deg, oklch(10% 0.02 60 / 0.85), oklch(10% 0.02 60 / 0) 30%, oklch(10% 0.02 60 / 0) 70%, oklch(10% 0.02 60 / 0.85)) !important;
 }
 :deep(.van-picker__frame) {
-  border-color: rgba(212, 168, 83, 0.2) !important;
+  border-color: oklch(72% 0.14 75 / 0.15) !important;
 }
 :deep(.van-picker-column__item) {
-  color: rgba(245, 230, 200, 0.35) !important;
+  color: oklch(92% 0.03 75 / 0.3) !important;
 }
 :deep(.van-picker-column__item--selected) {
-  color: #D4A853 !important;
+  color: oklch(72% 0.14 75) !important;
   font-weight: bold;
   font-size: 18px;
 }
