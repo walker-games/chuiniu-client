@@ -33,7 +33,7 @@ async function handleCreate() {
   loading.value = true
   try {
     const res = await createRoom()
-    router.push(`/lobby/${res.room.id}`)
+    router.push(`/lobby/${res.room_id}`)
   } catch (e: unknown) {
     error.value = e instanceof Error ? e.message : '创建房间失败'
   } finally {
@@ -51,7 +51,7 @@ async function handleJoin(code?: string) {
   loading.value = true
   try {
     const res = await joinRoom(joinCode)
-    router.push(`/lobby/${res.room.id}`)
+    router.push(`/lobby/${res.room_id}`)
   } catch (e: unknown) {
     error.value = e instanceof Error ? e.message : '加入房间失败'
   } finally {
