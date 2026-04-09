@@ -31,6 +31,59 @@ const messages = ref<ChatMessage[]>([])
 const showDice = ref(false)
 const hasRolled = ref(false)
 const showNextRound = ref(false)
+const eyeBtn = ref<HTMLDivElement | null>(null)
+
+// Draggable eye button
+let eyeDragging = false
+let eyeMoved = false
+let eyeStartX = 0, eyeStartY = 0, eyeOrigLeft = 0, eyeOrigTop = 0
+
+function onEyeTouchStart(e: TouchEvent) {
+  eyeDragging = true; eyeMoved = false
+  eyeStartX = e.touches[0].clientX; eyeStartY = e.touches[0].clientY
+  if (eyeBtn.value) {
+    const r = eyeBtn.value.getBoundingClientRect()
+    eyeOrigLeft = r.left; eyeOrigTop = r.top
+  }
+}
+function onEyeTouchMove(e: TouchEvent) {
+  if (!eyeDragging || !eyeBtn.value) return
+  const dx = e.touches[0].clientX - eyeStartX
+  const dy = e.touches[0].clientY - eyeStartY
+  if (Math.abs(dx) > 4 || Math.abs(dy) > 4) eyeMoved = true
+  eyeBtn.value.style.left = Math.max(4, Math.min(window.innerWidth - 52, eyeOrigLeft + dx)) + 'px'
+  eyeBtn.value.style.top = Math.max(4, Math.min(window.innerHeight - 52, eyeOrigTop + dy)) + 'px'
+  eyeBtn.value.style.right = 'auto'
+  eyeBtn.value.style.bottom = 'auto'
+}
+function onEyeTouchEnd() {
+  eyeDragging = false
+  if (!eyeMoved) showDice.value = !showDice.value
+}
+function onEyeMouseDown(e: MouseEvent) {
+  eyeDragging = true; eyeMoved = false
+  eyeStartX = e.clientX; eyeStartY = e.clientY
+  if (eyeBtn.value) {
+    const r = eyeBtn.value.getBoundingClientRect()
+    eyeOrigLeft = r.left; eyeOrigTop = r.top
+  }
+  const onMove = (ev: MouseEvent) => {
+    if (!eyeDragging || !eyeBtn.value) return
+    const dx = ev.clientX - eyeStartX, dy = ev.clientY - eyeStartY
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) eyeMoved = true
+    eyeBtn.value.style.left = Math.max(4, Math.min(window.innerWidth - 52, eyeOrigLeft + dx)) + 'px'
+    eyeBtn.value.style.top = Math.max(4, Math.min(window.innerHeight - 52, eyeOrigTop + dy)) + 'px'
+    eyeBtn.value.style.right = 'auto'; eyeBtn.value.style.bottom = 'auto'
+  }
+  const onUp = () => {
+    eyeDragging = false
+    if (!eyeMoved) showDice.value = !showDice.value
+    window.removeEventListener('mousemove', onMove)
+    window.removeEventListener('mouseup', onUp)
+  }
+  window.addEventListener('mousemove', onMove)
+  window.addEventListener('mouseup', onUp)
+}
 
 let msgCounter = 0
 function addMsg(type: ChatMessage['type'], text: string, playerId?: string, playerName?: string) {
@@ -261,15 +314,20 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Floating eye button (after rolled, during bidding) -->
-    <button
+    <!-- Draggable eye button -->
+    <div
       v-if="hasRolled && gameStore.phase !== 'rolling'"
-      class="fixed bottom-24 right-4 w-12 h-12 rounded-full bg-cn-wood border border-cn-gold/50
-             flex items-center justify-center text-xl shadow-lg active:scale-95 transition-transform z-40"
-      @click="showDice = !showDice"
+      ref="eyeBtn"
+      class="fixed w-12 h-12 rounded-full bg-cn-wood border border-cn-gold/50
+             flex items-center justify-center text-xl shadow-lg z-40 select-none"
+      style="right: 12px; bottom: 100px; touch-action: none;"
+      @touchstart.prevent="onEyeTouchStart"
+      @touchmove.prevent="onEyeTouchMove"
+      @touchend="onEyeTouchEnd"
+      @mousedown.prevent="onEyeMouseDown"
     >
       👁
-    </button>
+    </div>
 
     <!-- Dice viewer bottom sheet -->
     <DiceViewer
