@@ -13,19 +13,34 @@ const inviteCode = ref('')
 const error = ref('')
 const loading = ref(false)
 
+function isInIframe() {
+  try { return window.self !== window.top } catch { return true }
+}
+
 async function autoLogin() {
   if (authStore.isLoggedIn) return
-  if (inTelegram.value && initData.value) {
-    try {
-      await authStore.loginWithTelegram(initData.value)
-    } catch (e: unknown) {
-      error.value = '登录失败'
-    }
-  } else {
-    // Dev mode fallback
-    const devId = `dev-${Date.now()}`
-    authStore.devLogin(devId, `玩家${Math.floor(Math.random() * 1000)}`)
+
+  // In iframe: try to get token from URL params (passed by CardLottery)
+  const urlParams = new URLSearchParams(window.location.search)
+  const parentToken = urlParams.get('token')
+  const parentUser = urlParams.get('user')
+  if (parentToken) {
+    authStore.devLogin(parentUser || 'iframe-user', parentUser || '玩家')
+    return
   }
+
+  // Standalone TG: use dev login with TG user info
+  if (inTelegram.value) {
+    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user
+    const userId = tgUser?.id?.toString() || `tg-${Date.now()}`
+    const name = tgUser?.first_name || `玩家${Math.floor(Math.random() * 1000)}`
+    authStore.devLogin(userId, name)
+    return
+  }
+
+  // Browser dev mode
+  const devId = `dev-${Date.now()}`
+  authStore.devLogin(devId, `玩家${Math.floor(Math.random() * 1000)}`)
 }
 
 async function handleCreate() {
