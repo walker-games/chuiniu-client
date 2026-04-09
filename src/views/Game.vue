@@ -24,7 +24,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 const roomStore = useRoomStore()
 const gameStore = useGameStore()
-const { connect, send, on } = useWebSocket()
+const { connected, connect, send, on } = useWebSocket()
 const { init: initAudio, play } = useAudio()
 
 const roomId = route.params.roomId as string
@@ -59,6 +59,7 @@ function getPlayerName(id: string): string {
 const currentTurnName = computed(() => getPlayerName(gameStore.currentTurn))
 
 function handleRoll() {
+  console.log('[Game] handleRoll, connected:', connected.value, 'phase:', gameStore.phase)
   send('roll', {})
   play('shake')
 }
@@ -88,6 +89,7 @@ onMounted(() => {
   addMsg('system', '进入房间，等待游戏开始...')
 
   on('room_state', (msg: WSMessage) => {
+    console.log('[Game] room_state received, phase:', (msg.data as any)?.round?.phase, 'players:', (msg.data as any)?.players?.length)
     const data = msg.data as typeof roomStore.room & object
     const prevPlayers = players.value.map((p) => ({ id: p.id, rolled: p.rolled }))
     roomStore.updateFromState(data)
@@ -114,6 +116,7 @@ onMounted(() => {
   })
 
   on('roll_result', (msg: WSMessage) => {
+    console.log('[Game] roll_result received:', (msg.data as any)?.dice)
     const data = msg.data as RollResultData
     gameStore.setDice(data.dice)
     hasRolled.value = true
