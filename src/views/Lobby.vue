@@ -4,11 +4,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { useWebSocket } from '@/composables/useWebSocket'
 import { useAuthStore } from '@/stores/auth'
 import { useRoomStore } from '@/stores/room'
-import { getRoom } from '@/api/room'
 import PlayerSeat from '@/components/PlayerSeat.vue'
 import QrShare from '@/components/QrShare.vue'
 import type { WSMessage } from '@/types/ws'
-import type { Player } from '@/types/game'
 
 const route = useRoute()
 const router = useRouter()
@@ -18,7 +16,7 @@ const { connect, send, on } = useWebSocket()
 
 const roomId = route.params.roomId as string
 const isReady = ref(false)
-const maxSeats = 4
+const maxSeats = 8
 
 const players = computed(() => roomStore.room?.players ?? [])
 const inviteCode = computed(() => roomStore.room?.code ?? '')
@@ -36,19 +34,8 @@ function toggleReady() {
   send('ready', { ready: isReady.value })
 }
 
-onMounted(async () => {
-  // Fetch initial room state
-  try {
-    const res = await getRoom(roomId)
-    roomStore.updateFromState(res.room)
-    const me = myPlayer()
-    if (me) isReady.value = me.ready
-  } catch {
-    router.push('/')
-    return
-  }
-
-  // Connect WebSocket
+onMounted(() => {
+  // Connect WebSocket — server will send room_state immediately
   connect(roomId, authStore.token)
 
   on('room_state', (msg: WSMessage) => {
@@ -57,14 +44,9 @@ onMounted(async () => {
     if (me) isReady.value = me.ready
   })
 
-  on('player_joined', (msg: WSMessage) => {
-    const player = msg.data as Player
-    roomStore.addPlayer(player)
-  })
-
   on('player_left', (msg: WSMessage) => {
-    const data = msg.data as { playerId: string }
-    roomStore.removePlayer(data.playerId)
+    const data = msg.data as { player_id: string }
+    roomStore.removePlayer(data.player_id)
   })
 
   on('game_start', () => {
