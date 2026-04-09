@@ -6,16 +6,12 @@ import { useAuthStore } from '@/stores/auth'
 import { createRoom, joinRoom } from '@/api/room'
 
 const router = useRouter()
-const { ready, inTelegram, initData, startParam } = useTelegram()
+const { ready, inTelegram, startParam } = useTelegram()
 const authStore = useAuthStore()
 
 const inviteCode = ref('')
 const error = ref('')
 const loading = ref(false)
-
-function isInIframe() {
-  try { return window.self !== window.top } catch { return true }
-}
 
 async function autoLogin() {
   if (authStore.isLoggedIn) return
