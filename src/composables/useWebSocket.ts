@@ -25,7 +25,6 @@ export function useWebSocket() {
       wsUrl = `${protocol}//${location.host}/ws/${roomId}?token=${token}`
     }
     ws = new WebSocket(wsUrl)
-    ws = new WebSocket(url)
 
     ws.onopen = () => {
       connected.value = true
