@@ -11,11 +11,12 @@ const canvasRef = ref<HTMLCanvasElement | null>(null)
 const copied = ref(false)
 const { tg } = useTelegram()
 
-const botName = import.meta.env.VITE_TG_BOT_NAME || 'chuiniu_bot'
+const botName = import.meta.env.VITE_TG_BOT_NAME || 'WalkerLearnBot'
+const appName = import.meta.env.VITE_TG_APP_NAME || 'chuiniu'
 const link = ref('')
 
 function updateLink() {
-  link.value = `https://t.me/${botName}/app?startapp=${props.inviteCode}`
+  link.value = `https://t.me/${botName}/${appName}?startapp=${props.inviteCode}`
 }
 
 async function renderQR() {
