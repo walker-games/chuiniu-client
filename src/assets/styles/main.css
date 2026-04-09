@@ -1,10 +1,61 @@
 @import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap');
 
+@theme {
+  --color-cn-red: #C41E2A;
+  --color-cn-gold: #D4A853;
+  --color-cn-dark-red: #8B1A1A;
+  --color-cn-wood: #5C3A21;
+  --color-cn-cream: #F5E6C8;
+  --color-cn-ink: #1A1A1A;
+  --color-cn-gold-dim: #A68640;
+  --color-cn-wood-light: #7A5230;
+  --font-family-chinese: 'Ma Shan Zheng', 'Noto Serif SC', serif;
+}
+
 body {
   font-family: 'Noto Serif SC', serif;
   background-color: #1A1A1A;
   color: #F5E6C8;
   margin: 0;
   padding: 0;
+}
+
+/* Shake animation for dice cup */
+@keyframes shake-cup {
+  0%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(-12deg) translateY(-4px); }
+  20% { transform: rotate(12deg) translateY(-2px); }
+  30% { transform: rotate(-10deg) translateY(-6px); }
+  40% { transform: rotate(10deg) translateY(-3px); }
+  50% { transform: rotate(-8deg) translateY(-5px); }
+  60% { transform: rotate(8deg) translateY(-2px); }
+  70% { transform: rotate(-5deg) translateY(-3px); }
+  80% { transform: rotate(5deg) translateY(-1px); }
+  90% { transform: rotate(-2deg); }
+}
+
+.animate-shake-cup {
+  animation: shake-cup 0.8s ease-in-out;
+}
+
+/* Ink splash animation for punishment */
+@keyframes ink-splash {
+  0% { transform: scale(0.3); opacity: 0; }
+  60% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1.0); opacity: 1; }
+}
+
+.animate-ink-splash {
+  animation: ink-splash 0.8s ease-out forwards;
+}
+
+/* Pulse glow for current turn */
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 168, 83, 0.4); }
+  50% { box-shadow: 0 0 12px 4px rgba(212, 168, 83, 0.6); }
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 1.5s ease-in-out infinite;
 }
