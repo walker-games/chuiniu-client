@@ -12,11 +12,11 @@ const copied = ref(false)
 const { tg } = useTelegram()
 
 const botName = import.meta.env.VITE_TG_BOT_NAME || 'WalkerLearnBot'
-const appName = import.meta.env.VITE_TG_APP_NAME || 'chuiniu'
 const link = ref('')
 
 function updateLink() {
-  link.value = `https://t.me/${botName}/${appName}?startapp=${props.inviteCode}`
+  // Deep link into CardLottery with chuiniu_ prefix so it auto-opens in iframe
+  link.value = `https://t.me/${botName}?startapp=chuiniu_${props.inviteCode}`
 }
 
 async function renderQR() {

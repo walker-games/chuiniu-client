@@ -74,9 +74,11 @@ onMounted(async () => {
   ready()
   await autoLogin()
 
-  // Handle deep link auto-join
-  if (startParam.value) {
-    await handleJoin(startParam.value)
+  // Handle deep link auto-join (TG startParam or URL query ?code=)
+  const urlCode = new URLSearchParams(window.location.search).get('code')
+  const joinCode = startParam.value || urlCode
+  if (joinCode) {
+    await handleJoin(joinCode)
   }
 })
 </script>
