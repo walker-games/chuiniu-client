@@ -37,7 +37,7 @@ function toggleReady() {
 
 onMounted(() => {
   // Connect WebSocket — server will send room_state immediately
-  connect(roomId, authStore.token)
+  connect(roomId, authStore.token, authStore.user?.name)
 
   on('room_state', (msg: WSMessage) => {
     roomStore.updateFromState(msg.data as typeof roomStore.room & object)

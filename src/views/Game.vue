@@ -84,7 +84,7 @@ function handleNextRound() {
 
 onMounted(() => {
   initAudio()
-  connect(roomId, authStore.token)
+  connect(roomId, authStore.token, authStore.user?.name)
 
   addMsg('system', '进入房间，等待游戏开始...')
 
@@ -130,49 +130,51 @@ onMounted(() => {
   })
 
   on('bid_made', (msg: WSMessage) => {
-    const data = msg.data as BidMadeData
+    const data = msg.data as any
     gameStore.setBid({
-      player_id: data.playerId,
+      player_id: data.player_id,
       count: data.count,
       face: data.face,
       mode: data.mode as 'fei' | 'zhai',
     })
-    const name = getPlayerName(data.playerId)
+    const name = getPlayerName(data.player_id)
     const modeText = data.mode === 'fei' ? '飞' : '斋'
-    addMsg('bid', `${data.count}个${data.face} ${modeText}`, data.playerId, name)
+    addMsg('bid', `${data.count}个${data.face} ${modeText}`, data.player_id, name)
   })
 
   on('turn_change', (msg: WSMessage) => {
-    const data = msg.data as TurnChangeData
-    gameStore.setTurn(data.playerId)
-    const name = getPlayerName(data.playerId)
+    const data = msg.data as any
+    const turnId = data.turn_player_id || data.playerId
+    gameStore.setTurn(turnId)
+    const name = getPlayerName(turnId)
     addMsg('system', `轮到 ${name}`)
   })
 
   on('challenge_result', (msg: WSMessage) => {
-    const data = msg.data as ChallengeResultData
-    gameStore.challengeResult = data
+    const data = msg.data as any
     gameStore.setPhase('settling')
 
     const challengerName = getPlayerName(data.challenger)
-    const targetName = getPlayerName(data.target)
+    const bidder = data.bid?.player_id || data.bid?.PlayerID || ''
+    const bidderName = getPlayerName(bidder)
     addMsg('challenge', '', data.challenger, challengerName)
 
-    const modeText = data.bid.mode === 'fei' ? '飞' : '斋'
-    const bidText = `${data.bid.count}个${data.bid.face} ${modeText}`
+    const modeText = data.bid?.mode === 'fei' ? '飞' : '斋'
+    const bidText = `${data.bid?.count}个${data.bid?.face} ${modeText}`
     const winnerName = getPlayerName(data.winner)
     const loserName = getPlayerName(data.loser)
     addMsg(
       'result',
-      `${challengerName} 开 ${targetName}\n叫点: ${bidText}\n实际: ${data.actualCount}个\n${winnerName} 赢！${loserName} 受罚`,
+      `${challengerName} 开 ${bidderName}\n叫点: ${bidText}\n实际: ${data.actual_count}个\n🏆 ${winnerName} 赢！🍺 ${loserName} 受罚`,
     )
     play('challenge')
   })
 
   on('punishment', (msg: WSMessage) => {
-    const data = msg.data as PunishmentData
-    const name = getPlayerName(data.playerId)
-    addMsg('result', `${name} 的惩罚: ${data.punishment.text}`)
+    const data = msg.data as any
+    const name = getPlayerName(data.loser)
+    const punishText = typeof data.punishment === 'string' ? data.punishment : data.punishment?.text || '喝一杯'
+    addMsg('result', `🎯 ${name} 的惩罚: ${punishText}`)
     play('punishment')
     showNextRound.value = true
   })

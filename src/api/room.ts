@@ -17,14 +17,17 @@ async function authFetch(path: string, options: RequestInit = {}) {
   return res.json()
 }
 
-export function createRoom() {
-  return authFetch('/api/v1/rooms', { method: 'POST' })
+export function createRoom(name?: string) {
+  return authFetch('/api/v1/rooms', {
+    method: 'POST',
+    body: JSON.stringify({ name: name || '' }),
+  })
 }
 
-export function joinRoom(code: string) {
+export function joinRoom(code: string, name?: string) {
   return authFetch('/api/v1/rooms/join', {
     method: 'POST',
-    body: JSON.stringify({ code }),
+    body: JSON.stringify({ code, name: name || '' }),
   })
 }
 

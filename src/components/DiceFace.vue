@@ -3,15 +3,13 @@ defineProps<{
   value: number
 }>()
 
-const faces = ['', '\u2680', '\u2681', '\u2682', '\u2683', '\u2684', '\u2685']
+const CDN = 'https://images.walker-learn.xyz/chuiniu/dice'
 </script>
 
 <template>
-  <div
-    class="w-10 h-10 rounded-lg bg-cn-cream flex items-center justify-center
-           text-2xl shadow-md select-none"
-    :class="value === 1 || value === 4 ? 'text-cn-red' : 'text-cn-ink'"
-  >
-    {{ faces[value] || '?' }}
-  </div>
+  <img
+    :src="`${CDN}/dice-${value}.png`"
+    :alt="`${value}`"
+    class="w-12 h-12 rounded-lg shadow-md select-none"
+  />
 </template>

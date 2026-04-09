@@ -11,18 +11,17 @@ export function useWebSocket() {
   let roomId = ''
   let token = ''
 
-  function connect(wsRoomId: string, authToken: string) {
+  function connect(wsRoomId: string, authToken: string, userName?: string) {
     roomId = wsRoomId
     token = authToken
     const apiBase = import.meta.env.VITE_API_BASE || ''
+    const nameParam = userName ? `&name=${encodeURIComponent(userName)}` : ''
     let wsUrl: string
     if (apiBase) {
-      // Production: use API domain for WS
-      wsUrl = apiBase.replace(/^https:/, 'wss:').replace(/^http:/, 'ws:') + `/ws/${roomId}?token=${token}`
+      wsUrl = apiBase.replace(/^https:/, 'wss:').replace(/^http:/, 'ws:') + `/ws/${roomId}?token=${token}${nameParam}`
     } else {
-      // Dev: use same host (Vite proxy handles it)
       const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
-      wsUrl = `${protocol}//${location.host}/ws/${roomId}?token=${token}`
+      wsUrl = `${protocol}//${location.host}/ws/${roomId}?token=${token}${nameParam}`
     }
     ws = new WebSocket(wsUrl)
 
