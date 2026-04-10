@@ -22,7 +22,10 @@ async function autoLogin() {
   const parentToken = urlParams.get('token')
   const parentUser = urlParams.get('user')
   if (parentToken) {
-    authStore.devLogin(parentUser || 'iframe-user', parentUser || '玩家')
+    // 直接使用父应用传来的 token（dev-{id} 或 IAM JWT）
+    authStore.token = parentToken
+    authStore.user = { id: parentToken.replace('dev-', ''), name: parentUser || '玩家', avatar: '' }
+    localStorage.setItem('token', parentToken)
     return
   }
 
