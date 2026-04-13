@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { Picker, Button, type PickerOption } from 'vant'
-import 'vant/es/picker/style'
-import 'vant/es/button/style'
 import type { Bid } from '@/types/game'
+
+const CDN = '/images/dice'
 
 const props = defineProps<{
   minCount: number
@@ -38,40 +37,23 @@ const effectiveMinCount = computed(() => {
   return prev.count
 })
 
-const countOptions = computed<PickerOption[]>(() => {
-  const opts: PickerOption[] = []
-  for (let i = effectiveMinCount.value; i <= props.maxCount; i++) {
-    opts.push({ text: `${i}`, value: i })
+function increment() {
+  if (count.value < props.maxCount) count.value++
+}
+
+function decrement() {
+  if (count.value > effectiveMinCount.value) count.value--
+}
+
+function selectFace(f: number) {
+  face.value = f
+}
+
+function toggleMode() {
+  mode.value = mode.value === 'fei' ? 'zhai' : 'fei'
+  if (count.value < effectiveMinCount.value) {
+    count.value = effectiveMinCount.value
   }
-  return opts
-})
-
-const faceOptions: PickerOption[] = [
-  { text: '1', value: 1 },
-  { text: '2', value: 2 },
-  { text: '3', value: 3 },
-  { text: '4', value: 4 },
-  { text: '5', value: 5 },
-  { text: '6', value: 6 },
-]
-
-const modeOptions: PickerOption[] = [
-  { text: '飛', value: 'fei' },
-  { text: '齋', value: 'zhai' },
-]
-
-const columns = computed(() => [countOptions.value, faceOptions, modeOptions])
-
-const selectedValues = ref([count.value, face.value, mode.value])
-
-watch([count, face, mode], () => {
-  selectedValues.value = [count.value, face.value, mode.value]
-})
-
-function onChange({ selectedValues: vals }: { selectedValues: (string | number)[] }) {
-  count.value = Number(vals[0]) || 1
-  face.value = Number(vals[1]) || 1
-  mode.value = vals[2] as 'fei' | 'zhai'
 }
 
 function isBidValid() {
@@ -90,88 +72,231 @@ const modeText = computed(() => mode.value === 'fei' ? '飛' : '齋')
 </script>
 
 <template>
-  <div class="bg-cn-surface/90 border-t border-cn-gold/10">
-    <!-- Vant Picker -->
-    <Picker
-      v-model="selectedValues"
-      :columns="columns"
-      :visible-option-num="3"
-      :option-height="40"
-      :show-toolbar="false"
-      @change="onChange"
-    />
+  <div class="bid-root">
+    <!-- Dice face row -->
+    <div class="face-row">
+      <button
+        v-for="f in 6"
+        :key="f"
+        class="face-btn"
+        :class="{ 'face-btn--active': face === f }"
+        @click="selectFace(f)"
+      >
+        <img :src="`${CDN}/dice-${f}.png`" :alt="`${f}`" class="face-img" />
+      </button>
+    </div>
+
+    <!-- Count + Mode row -->
+    <div class="control-row">
+      <div class="count-stepper">
+        <button class="st-btn" :disabled="count <= effectiveMinCount" @click="decrement">−</button>
+        <span class="count-val font-serif-cn">{{ count }}</span>
+        <button class="st-btn" :disabled="count >= maxCount" @click="increment">+</button>
+      </div>
+
+      <span class="bid-label font-serif-cn">個</span>
+
+      <div class="face-preview">
+        <img :src="`${CDN}/dice-${face}.png`" class="preview-img" />
+      </div>
+
+      <button
+        class="mode-btn font-serif-cn"
+        :class="mode === 'zhai' ? 'mode-btn--zhai' : ''"
+        @click="toggleMode"
+      >
+        {{ modeText }}
+      </button>
+    </div>
 
     <!-- Action buttons -->
-    <div class="flex gap-2.5 px-4 pb-3">
-      <Button
-        class="bid-submit-btn"
+    <div class="bid-actions">
+      <button
+        class="btn-bid"
         :disabled="!canSubmit"
         @click="$emit('bid', { count, face, mode })"
       >
-        <span class="font-serif-cn text-lg">叫! {{ count }}個{{ face }} {{ modeText }}</span>
-      </Button>
-      <Button
+        <span class="font-serif-cn">叫! {{ count }}個{{ face }} {{ modeText }}</span>
+      </button>
+      <button
         v-if="previousBid"
-        class="bid-challenge-btn"
+        class="btn-challenge"
         @click="$emit('challenge')"
       >
-        <span class="font-serif-cn text-lg font-bold">開!</span>
-      </Button>
+        <span class="font-serif-cn">開!</span>
+      </button>
     </div>
   </div>
 </template>
 
 <style scoped>
-.bid-submit-btn {
-  flex: 1;
-  height: 48px;
-  border-radius: 12px;
-  background: oklch(48% 0.2 25);
-  border: 1px solid oklch(72% 0.14 75 / 0.2);
-  color: oklch(72% 0.14 75);
-  cursor: pointer;
-  transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1), opacity 100ms;
-}
-.bid-submit-btn:active {
-  transform: scale(0.97);
-  opacity: 0.85;
-}
-.bid-submit-btn:disabled {
-  opacity: 0.25;
-  cursor: not-allowed;
+.bid-root {
+  padding: 10px 14px 14px;
+  background: linear-gradient(180deg, #2a2010ee, #1e1808f0);
+  border-top: 1px solid #d4a85320;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.bid-challenge-btn {
-  padding: 0 24px;
-  height: 48px;
-  border-radius: 12px;
-  background: oklch(72% 0.14 75);
+/* ── Dice face row ── */
+.face-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.face-btn {
+  width: 46px;
+  height: 46px;
+  padding: 4px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: #1a140888;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 120ms cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.face-btn--active {
+  border-color: #d4a853;
+  background: #d4a85318;
+  transform: scale(1.12);
+  box-shadow: 0 0 12px #d4a85330;
+}
+
+.face-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 5px;
+  pointer-events: none;
+}
+
+/* ── Count + Mode row ── */
+.control-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.count-stepper {
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  background: #14100808;
+  border: 1px solid #d4a85320;
+  overflow: hidden;
+}
+
+.st-btn {
+  width: 38px;
+  height: 38px;
+  background: none;
   border: none;
-  color: oklch(10% 0.02 60);
-  font-weight: bold;
+  color: #d4a853;
+  font-size: 22px;
+  font-weight: 700;
   cursor: pointer;
-  transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1), opacity 100ms;
-}
-.bid-challenge-btn:active {
-  transform: scale(0.97);
-  opacity: 0.85;
+  -webkit-tap-highlight-color: transparent;
 }
 
-:deep(.van-picker) {
-  background: transparent !important;
+.st-btn:active { background: #d4a85312; }
+.st-btn:disabled { color: #3a3020; cursor: not-allowed; }
+
+.count-val {
+  width: 36px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #f0d080;
+  line-height: 1;
 }
-:deep(.van-picker__mask) {
-  background: linear-gradient(180deg, oklch(10% 0.02 60 / 0.85), oklch(10% 0.02 60 / 0) 30%, oklch(10% 0.02 60 / 0) 70%, oklch(10% 0.02 60 / 0.85)) !important;
+
+.bid-label {
+  color: #6a5a38;
+  font-size: 15px;
 }
-:deep(.van-picker__frame) {
-  border-color: oklch(72% 0.14 75 / 0.15) !important;
+
+.face-preview {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: #d4a85310;
+  border: 1px solid #d4a85325;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-:deep(.van-picker-column__item) {
-  color: oklch(92% 0.03 75 / 0.3) !important;
+
+.preview-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
 }
-:deep(.van-picker-column__item--selected) {
-  color: oklch(72% 0.14 75) !important;
-  font-weight: bold;
+
+.mode-btn {
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: 1px solid #d4a85330;
+  background: linear-gradient(180deg, #3a3018, #2a2210);
+  color: #d4a853;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 100ms;
+}
+
+.mode-btn:active { transform: scale(0.95); }
+
+.mode-btn--zhai {
+  border-color: #c0302050;
+  background: linear-gradient(180deg, #3a1810, #2a1008);
+  color: #e08060;
+}
+
+/* ── Action buttons ── */
+.bid-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-bid {
+  flex: 1;
+  height: 46px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  background: linear-gradient(180deg, #e8c050, #c49a38, #a07a20);
+  color: #1a1208;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 1px 0 #f0d880 inset, 0 -1px 0 #886818 inset, 0 3px 10px #c49a3840;
+  transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-bid:active { transform: scale(0.97) translateY(1px); }
+.btn-bid:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.btn-challenge {
+  padding: 0 22px;
+  height: 46px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  background: linear-gradient(180deg, #d03828, #a01810, #801008);
+  color: #f0d080;
   font-size: 18px;
+  font-weight: 700;
+  box-shadow: 0 1px 0 #e8483890 inset, 0 -1px 0 #60100890 inset, 0 3px 10px #80100840;
+  transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+.btn-challenge:active { transform: scale(0.97) translateY(1px); }
 </style>

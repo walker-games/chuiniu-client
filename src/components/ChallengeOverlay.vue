@@ -20,11 +20,11 @@ watch(() => props.visible, (v) => {
 </script>
 
 <template>
-  <Teleport to="body">
+  <Teleport to="#app">
     <!-- White flash -->
     <div
       v-if="phase === 'flash' || phase === 'text'"
-      class="fixed inset-0 z-50 pointer-events-none"
+      class="absolute inset-0 z-50 pointer-events-none"
     >
       <div
         class="absolute inset-0 bg-white animate-challenge-flash"
@@ -34,7 +34,7 @@ watch(() => props.visible, (v) => {
     <!-- Challenge text -->
     <div
       v-if="phase === 'text'"
-      class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none animate-shake-screen"
+      class="absolute inset-0 z-50 flex items-center justify-center pointer-events-none animate-shake-screen"
     >
       <div class="animate-challenge-slam flex flex-col items-center gap-3">
         <div class="challenge-main-text font-serif-cn font-bold text-cn-red text-center leading-none">

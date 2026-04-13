@@ -231,6 +231,23 @@ onMounted(() => {
     const challengerName = getPlayerName(data.challenger)
     const bidder = data.bid?.player_id || data.bid?.PlayerID || ''
     const bidderName = getPlayerName(bidder)
+
+    // Store challenge result for Result page
+    gameStore.challengeResult = {
+      challenger: data.challenger,
+      target: bidder,
+      bid: {
+        player_id: bidder,
+        count: data.bid?.count,
+        face: data.bid?.face,
+        mode: data.bid?.mode,
+      },
+      allDice: data.all_dice,
+      actualCount: data.actual_count,
+      winner: data.winner,
+      loser: data.loser,
+    }
+
     addMsg('challenge', '', data.challenger, challengerName)
 
     // Show challenge overlay with dramatic effect
@@ -256,6 +273,13 @@ onMounted(() => {
     const loserId = data.loser
     const name = getPlayerName(loserId)
     const punishText = typeof data.punishment === 'string' ? data.punishment : data.punishment?.text || '飲一杯'
+
+    // Store punishment for Result page
+    gameStore.punishment = {
+      playerId: loserId,
+      punishment: { text: punishText, level: data.level || 1 },
+    }
+
     addMsg('result', `${name} 的懲罰: ${punishText}`)
     play('punishment')
     showNextRound.value = true
@@ -275,18 +299,13 @@ onMounted(() => {
 
 <template>
   <div
-    class="h-screen flex flex-col bg-cn-ink"
+    class="game-shell"
     :class="{ 'animate-shake-screen': isShaking }"
   >
     <!-- Top bar -->
-    <div class="flex items-center justify-between px-4 py-2.5 border-b border-cn-gold/8 bg-cn-surface/60 shrink-0">
-      <div class="flex items-center gap-2">
-        <span class="text-cn-gold font-serif-cn text-base font-bold">第{{ roundNumber }}輪</span>
-      </div>
-      <div class="flex items-center gap-1.5">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cn-muted"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span class="text-cn-muted text-xs">{{ playerCount }}人</span>
-      </div>
+    <div class="game-topbar shrink-0">
+      <span class="font-serif-cn topbar-round">第{{ roundNumber }}輪</span>
+      <span class="topbar-players">共{{ playerCount }}人</span>
     </div>
 
     <!-- Chat feed -->
@@ -310,15 +329,13 @@ onMounted(() => {
         </button>
       </div>
 
-      <!-- Rolling phase: waiting for others with wobbling dice -->
+      <!-- Rolling phase: waiting for others -->
       <div
         v-else-if="gameStore.phase === 'rolling' && hasRolled"
-        class="px-4 py-4 flex items-center gap-2"
+        class="wait-bar"
       >
-        <div class="animate-dice-wobble text-cn-gold/40">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M16 8h.01"/><path d="M12 12h.01"/><path d="M8 16h.01"/></svg>
-        </div>
-        <p class="text-cn-muted text-xs">等待其他玩家搖骰子...</p>
+        <div class="animate-dice-wobble wait-icon">🎲</div>
+        <span class="wait-text font-serif-cn">等待其他玩家搖骰子...</span>
       </div>
 
       <!-- Bidding phase: my turn -->
@@ -336,11 +353,14 @@ onMounted(() => {
       <!-- Bidding phase: not my turn -->
       <div
         v-else-if="gameStore.phase === 'bidding' && !isMyTurn"
-        class="px-4 py-4"
+        class="wait-bar"
       >
-        <p class="text-cn-muted font-serif-cn text-sm pl-3">
-          等待 <span class="text-cn-gold/70">{{ currentTurnName }}</span> 叫點...
-        </p>
+        <div class="wait-dots">
+          <span class="dot" /><span class="dot" /><span class="dot" />
+        </div>
+        <span class="wait-text font-serif-cn">
+          等待 <span style="color:#f0d080;">{{ currentTurnName }}</span> 叫點...
+        </span>
       </div>
 
       <!-- Settling phase: next round button -->
@@ -358,15 +378,14 @@ onMounted(() => {
     <div
       v-if="hasRolled && gameStore.phase !== 'rolling'"
       ref="eyeBtn"
-      class="fixed w-12 h-12 rounded-full bg-cn-surface border border-cn-gold/25
-             flex items-center justify-center z-40 select-none cursor-pointer"
-      style="right: 12px; bottom: 100px; touch-action: none;"
+      class="eye-fab select-none cursor-pointer"
+      style="right: 12px; bottom: 160px; touch-action: none;"
       @touchstart.prevent="onEyeTouchStart"
       @touchmove.prevent="onEyeTouchMove"
       @touchend="onEyeTouchEnd"
       @mousedown.prevent="onEyeMouseDown"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cn-gold"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d4a853" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
     </div>
 
     <!-- Dice viewer bottom sheet -->
@@ -394,6 +413,94 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* ── Game shell ── */
+.game-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  background: url('/images/bg-gold.jpg') center/cover no-repeat, #1a1508;
+  overflow: hidden;
+}
+
+/* ── Top bar ── */
+.game-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, #2a2010cc, #1e1808aa);
+  border-bottom: 1px solid #d4a85315;
+}
+
+.topbar-round {
+  color: #f0d080;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.topbar-players {
+  color: #6a5a38;
+  font-size: 12px;
+}
+
+/* ── Wait bar ── */
+.wait-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 16px;
+  background: linear-gradient(180deg, #2a2010cc, #1e1808aa);
+  border-top: 1px solid #d4a85310;
+}
+
+.wait-icon {
+  font-size: 20px;
+}
+
+.wait-text {
+  color: #8a7442;
+  font-size: 13px;
+}
+
+.wait-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.wait-dots .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d4a853;
+  animation: dot-pulse 1.2s ease-in-out infinite;
+}
+
+.wait-dots .dot:nth-child(2) { animation-delay: 0.2s; }
+.wait-dots .dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dot-pulse {
+  0%, 60%, 100% { opacity: 0.2; transform: scale(0.8); }
+  30% { opacity: 1; transform: scale(1.2); }
+}
+
+/* ── Eye FAB ── */
+.eye-fab {
+  position: fixed;
+  z-index: 45;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #352a15, #2a2010);
+  border: 1.5px solid #d4a85340;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 12px #00000060, 0 0 16px #d4a85315;
+}
+
 /* ── Roll button: Chinese gaming table style ── */
 .game-roll-btn {
   position: relative;

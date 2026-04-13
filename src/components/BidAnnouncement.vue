@@ -21,10 +21,10 @@ watch(() => props.visible, (v) => {
 </script>
 
 <template>
-  <Teleport to="body">
+  <Teleport to="#app">
     <div
       v-if="phase !== 'hidden'"
-      class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"
+      class="absolute inset-0 z-50 flex items-center justify-center pointer-events-none"
     >
       <div
         :class="phase === 'in' ? 'animate-bid-slam' : 'animate-bid-out'"

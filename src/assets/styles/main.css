@@ -7,8 +7,8 @@
   --color-cn-dark-red: oklch(35% 0.15 25);
   --color-cn-wood: oklch(35% 0.08 55);
   --color-cn-cream: oklch(92% 0.03 75);
-  --color-cn-ink: oklch(10% 0.02 60);
-  --color-cn-surface: oklch(15% 0.02 60);
+  --color-cn-ink: oklch(14% 0.02 60);
+  --color-cn-surface: oklch(22% 0.03 55);
   --color-cn-gold-dim: oklch(60% 0.1 75);
   --color-cn-wood-light: oklch(42% 0.07 55);
   --color-cn-muted: oklch(55% 0.02 60);
@@ -17,13 +17,36 @@
 
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: oklch(10% 0.02 60);
+  background-color: oklch(10% 0.02 50);
   color: oklch(92% 0.03 75);
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
   line-height: 1.55;
+  overflow: hidden;
 }
+
+/* Mobile shell: max-width + centered on PC */
+#app {
+  max-width: 430px;
+  margin: 0 auto;
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  background-color: oklch(14% 0.02 60);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* On PC, ensure #app is the containing block for absolute overlays */
+@media (min-width: 431px) {
+  #app { overflow: clip; }
+}
+
+/* Hide scrollbar but keep scroll */
+#app::-webkit-scrollbar { display: none; }
+#app { scrollbar-width: none; }
 
 /* Serif headings */
 .font-serif-cn {
@@ -31,9 +54,9 @@ body {
   line-height: 1.25;
 }
 
-/* Surface card — simple, no glass */
+/* Surface card */
 .surface-card {
-  background: oklch(15% 0.02 60 / 0.85);
+  background: oklch(22% 0.03 55 / 0.85);
   border: 1px solid oklch(72% 0.14 75 / 0.1);
   border-radius: 12px;
 }

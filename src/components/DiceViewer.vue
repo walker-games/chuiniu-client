@@ -15,16 +15,16 @@ const emit = defineEmits<{
   <Transition name="dice-viewer">
     <div
       v-if="visible"
-      class="fixed inset-0 z-50 flex flex-col justify-end"
+      class="viewer-overlay"
       @click.self="emit('close')"
     >
       <!-- Backdrop -->
-      <div class="absolute inset-0 bg-cn-ink/60" @click="emit('close')" />
+      <div class="viewer-backdrop" @click="emit('close')" />
 
       <!-- Sheet -->
-      <div class="relative bg-cn-surface border-t border-cn-gold/15 rounded-t-2xl px-4 py-5">
-        <div class="w-10 h-1 bg-cn-muted/40 rounded-full mx-auto mb-4" />
-        <p class="text-cn-gold/60 text-xs mb-4 font-serif-cn tracking-wider pl-1">我的骰子</p>
+      <div class="viewer-sheet">
+        <div class="w-10 h-1 rounded-full mx-auto mb-4" style="background:#d4a85340;" />
+        <p class="text-xs mb-4 font-serif-cn tracking-wider pl-1" style="color:#d4a85390;">我的骰子</p>
         <div class="flex justify-center gap-3 pb-2">
           <div
             v-for="(d, i) in dice"
@@ -41,22 +41,50 @@ const emit = defineEmits<{
 </template>
 
 <style scoped>
+.viewer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  /* Center within 430px on PC */
+  max-width: 430px;
+  margin: 0 auto;
+  left: 0;
+  right: 0;
+}
+
+.viewer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: #1a120880;
+}
+
+.viewer-sheet {
+  position: relative;
+  background: linear-gradient(180deg, #2a2010, #1e1808);
+  border-top: 1px solid #d4a85320;
+  border-radius: 16px 16px 0 0;
+  padding: 16px 16px 20px;
+}
+
 .dice-viewer-enter-active,
 .dice-viewer-leave-active {
   transition: opacity 250ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-.dice-viewer-enter-active .relative,
-.dice-viewer-leave-active .relative {
+.dice-viewer-enter-active .viewer-sheet,
+.dice-viewer-leave-active .viewer-sheet {
   transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .dice-viewer-enter-from,
 .dice-viewer-leave-to {
   opacity: 0;
 }
-.dice-viewer-enter-from .relative {
+.dice-viewer-enter-from .viewer-sheet {
   transform: translateY(100%);
 }
-.dice-viewer-leave-to .relative {
+.dice-viewer-leave-to .viewer-sheet {
   transform: translateY(100%);
 }
 </style>

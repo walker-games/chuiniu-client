@@ -20,7 +20,8 @@ onMounted(() => {
 
 <template>
   <div
-    class="fixed inset-0 z-50 bg-cn-ink/85 flex items-center justify-center cursor-pointer"
+    class="absolute inset-0 z-50 flex items-center justify-center cursor-pointer"
+    style="background: #1a1208dd;"
     :class="{ 'animate-shake-screen': shaking }"
     @click="emit('close')"
   >

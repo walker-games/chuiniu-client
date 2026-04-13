@@ -3,7 +3,7 @@ defineProps<{
   value: number
 }>()
 
-const CDN = 'https://images.walker-learn.xyz/chuiniu/dice'
+const CDN = '/images/dice'
 </script>
 
 <template>
