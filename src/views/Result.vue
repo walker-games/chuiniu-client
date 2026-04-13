@@ -17,6 +17,7 @@ const gameStore = useGameStore()
 
 const roomId = route.params.roomId as string
 const showPunishment = ref(false)
+const shaking = ref(false)
 
 const result = computed(() => gameStore.challengeResult)
 const players = computed(() => roomStore.room?.players ?? [])
@@ -63,6 +64,10 @@ onMounted(() => {
     router.push(`/lobby/${roomId}`)
     return
   }
+  // Screen shake on result reveal
+  shaking.value = true
+  setTimeout(() => { shaking.value = false }, 500)
+
   setTimeout(() => {
     if (punishmentText.value) {
       showPunishment.value = true
@@ -72,7 +77,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col px-4 py-6 bg-pattern">
+  <div
+    class="min-h-screen flex flex-col px-4 py-6 bg-pattern"
+    :class="{ 'animate-shake-screen': shaking }"
+  >
     <!-- Header -->
     <h1 class="result-title font-serif-cn text-center mb-6 font-bold animate-fade-up">開獎!</h1>
 
@@ -88,19 +96,32 @@ onMounted(() => {
         </p>
       </div>
 
-      <!-- All dice revealed -->
+      <!-- All dice revealed with bounce animation -->
       <div class="space-y-3 mb-6 animate-fade-up stagger-2">
         <div
           v-for="(dice, playerId) in result.allDice"
           :key="playerId"
           class="flex items-center gap-3 px-3 py-2.5 rounded-xl"
-          :class="playerId === result.loser ? 'bg-cn-red/8 border border-cn-red/15' : 'surface-card'"
+          :class="[
+            playerId === result.loser
+              ? 'bg-cn-red/8 border border-cn-red/15 animate-loser-pulse'
+              : playerId === result.winner
+                ? 'surface-card animate-winner-glow'
+                : 'surface-card'
+          ]"
         >
           <span class="text-sm text-cn-cream/60 min-w-14 truncate font-serif-cn">
             {{ getPlayerName(playerId as string) }}
           </span>
           <div class="flex gap-1.5 flex-wrap">
-            <DiceFace v-for="(d, i) in dice" :key="i" :value="d" />
+            <div
+              v-for="(d, i) in dice"
+              :key="i"
+              class="animate-dice-bounce"
+              :style="{ animationDelay: `${i * 80}ms` }"
+            >
+              <DiceFace :value="d" />
+            </div>
           </div>
         </div>
       </div>
@@ -111,8 +132,11 @@ onMounted(() => {
         <span class="text-cn-gold font-serif-cn text-2xl font-bold ml-2">{{ result.actualCount }}</span>
       </div>
 
-      <!-- Win/lose -->
-      <div class="mb-8 animate-fade-up stagger-4">
+      <!-- Win/lose with glow -->
+      <div
+        class="mb-8 animate-fade-up stagger-4 py-3 px-4 rounded-xl text-center"
+        :class="isWinner ? 'animate-winner-glow' : 'animate-loser-pulse'"
+      >
         <p
           class="font-serif-cn text-2xl font-bold"
           :class="isWinner ? 'text-cn-gold' : 'text-cn-red'"

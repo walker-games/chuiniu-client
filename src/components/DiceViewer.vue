@@ -26,7 +26,14 @@ const emit = defineEmits<{
         <div class="w-10 h-1 bg-cn-muted/40 rounded-full mx-auto mb-4" />
         <p class="text-cn-gold/60 text-xs mb-4 font-serif-cn tracking-wider pl-1">我的骰子</p>
         <div class="flex justify-center gap-3 pb-2">
-          <DiceFace v-for="(d, i) in dice" :key="i" :value="d" />
+          <div
+            v-for="(d, i) in dice"
+            :key="i"
+            class="animate-dice-bounce"
+            :style="{ animationDelay: `${i * 100}ms` }"
+          >
+            <DiceFace :value="d" />
+          </div>
         </div>
       </div>
     </div>

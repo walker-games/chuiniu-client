@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { Button } from 'vant'
-import 'vant/es/button/style'
 import { useWebSocket } from '@/composables/useWebSocket'
 import { useAuthStore } from '@/stores/auth'
 import { useRoomStore } from '@/stores/room'
@@ -11,6 +9,8 @@ import { useAudio } from '@/composables/useAudio'
 import ChatFeed from '@/components/ChatFeed.vue'
 import BidInput from '@/components/BidInput.vue'
 import DiceViewer from '@/components/DiceViewer.vue'
+import BidAnnouncement from '@/components/BidAnnouncement.vue'
+import ChallengeOverlay from '@/components/ChallengeOverlay.vue'
 import type { WSMessage } from '@/types/ws'
 import type { ChatMessage } from '@/types/game'
 import type { RollResultData } from '@/types/ws'
@@ -33,7 +33,14 @@ const messages = ref<ChatMessage[]>([])
 const showDice = ref(false)
 const hasRolled = ref(false)
 const showNextRound = ref(false)
+const isShaking = ref(false)
 const eyeBtn = ref<HTMLDivElement | null>(null)
+
+// Bid announcement state
+const bidAnnounce = ref({ visible: false, text: '', playerName: '' })
+
+// Challenge overlay state
+const challengeOverlay = ref({ visible: false, challengerName: '' })
 
 // Draggable eye button
 let eyeDragging = false
@@ -106,10 +113,16 @@ function getPlayerName(id: string): string {
 
 const currentTurnName = computed(() => getPlayerName(gameStore.currentTurn))
 
+function triggerShake() {
+  isShaking.value = true
+  setTimeout(() => { isShaking.value = false }, 500)
+}
+
 function handleRoll() {
   console.log('[Game] handleRoll, connected:', connected.value, 'phase:', gameStore.phase)
   send('roll', {})
   play('shake')
+  isShaking.value = false // reset for re-trigger
 }
 
 function handleBid(payload: { count: number; face: number; mode: 'fei' | 'zhai' }) {
@@ -194,6 +207,13 @@ onMounted(() => {
     const name = getPlayerName(data.player_id)
     const modeText = data.mode === 'fei' ? '飛' : '齋'
     addMsg('bid', `${data.count}個${data.face} ${modeText}`, data.player_id, name)
+
+    // Show bid announcement overlay
+    bidAnnounce.value = {
+      visible: true,
+      text: `${data.count}個${data.face} ${modeText}`,
+      playerName: name,
+    }
   })
 
   on('turn_change', (msg: WSMessage) => {
@@ -212,6 +232,13 @@ onMounted(() => {
     const bidder = data.bid?.player_id || data.bid?.PlayerID || ''
     const bidderName = getPlayerName(bidder)
     addMsg('challenge', '', data.challenger, challengerName)
+
+    // Show challenge overlay with dramatic effect
+    challengeOverlay.value = {
+      visible: true,
+      challengerName: challengerName,
+    }
+    triggerShake()
 
     const modeText = data.bid?.mode === 'fei' ? '飛' : '齋'
     const bidText = `${data.bid?.count}個${data.bid?.face} ${modeText}`
@@ -234,6 +261,12 @@ onMounted(() => {
     showNextRound.value = true
   })
 
+  on('player_left', (msg: WSMessage) => {
+    const data = msg.data as any
+    const name = getPlayerName(data.player_id)
+    addMsg('system', `${name} 離開了房間`)
+  })
+
   on('round_end', (_msg: WSMessage) => {
     showNextRound.value = true
   })
@@ -241,7 +274,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="h-screen flex flex-col bg-cn-ink">
+  <div
+    class="h-screen flex flex-col bg-cn-ink"
+    :class="{ 'animate-shake-screen': isShaking }"
+  >
     <!-- Top bar -->
     <div class="flex items-center justify-between px-4 py-2.5 border-b border-cn-gold/8 bg-cn-surface/60 shrink-0">
       <div class="flex items-center gap-2">
@@ -263,24 +299,26 @@ onMounted(() => {
         v-if="gameStore.phase === 'rolling' && !hasRolled"
         class="px-4 py-3 flex justify-center"
       >
-        <Button
-          class="game-roll-btn"
-          size="large"
+        <button
+          class="game-roll-btn group"
           @click="handleRoll"
         >
-          <span class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M16 8h.01"/><path d="M12 12h.01"/><path d="M8 16h.01"/></svg>
-            <span class="font-serif-cn text-lg">搖骰子</span>
-          </span>
-        </Button>
+          <div class="roll-btn-inner">
+            <span class="roll-btn-icon">🎲</span>
+            <span class="font-serif-cn roll-btn-text">搖 骰 子</span>
+          </div>
+        </button>
       </div>
 
-      <!-- Rolling phase: waiting for others -->
+      <!-- Rolling phase: waiting for others with wobbling dice -->
       <div
         v-else-if="gameStore.phase === 'rolling' && hasRolled"
-        class="px-4 py-4"
+        class="px-4 py-4 flex items-center gap-2"
       >
-        <p class="text-cn-muted text-xs pl-3">等待其他玩家搖骰子...</p>
+        <div class="animate-dice-wobble text-cn-gold/40">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M16 8h.01"/><path d="M12 12h.01"/><path d="M8 16h.01"/></svg>
+        </div>
+        <p class="text-cn-muted text-xs">等待其他玩家搖骰子...</p>
       </div>
 
       <!-- Bidding phase: my turn -->
@@ -307,13 +345,12 @@ onMounted(() => {
 
       <!-- Settling phase: next round button -->
       <div v-else-if="showNextRound" class="px-4 py-3">
-        <Button
+        <button
           class="game-next-btn"
-          size="large"
           @click="handleNextRound"
         >
           <span class="font-serif-cn text-lg font-bold">下一輪</span>
-        </Button>
+        </button>
       </div>
     </div>
 
@@ -338,38 +375,147 @@ onMounted(() => {
       :visible="showDice"
       @close="showDice = false"
     />
+
+    <!-- Bid announcement overlay -->
+    <BidAnnouncement
+      :text="bidAnnounce.text"
+      :player-name="bidAnnounce.playerName"
+      :visible="bidAnnounce.visible"
+      @done="bidAnnounce.visible = false"
+    />
+
+    <!-- Challenge dramatic overlay -->
+    <ChallengeOverlay
+      :visible="challengeOverlay.visible"
+      :challenger-name="challengeOverlay.challengerName"
+      @done="challengeOverlay.visible = false"
+    />
   </div>
 </template>
 
 <style scoped>
+/* ── Roll button: Chinese gaming table style ── */
 .game-roll-btn {
+  position: relative;
   width: 100%;
-  height: 48px;
-  border-radius: 14px;
-  background: oklch(48% 0.2 25);
-  border: 1px solid oklch(72% 0.14 75 / 0.25);
-  color: oklch(72% 0.14 75);
+  padding: 0;
+  border: none;
+  border-radius: 16px;
   cursor: pointer;
-  transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1), opacity 100ms;
-}
-.game-roll-btn:active {
-  transform: scale(0.97);
-  opacity: 0.85;
+  -webkit-tap-highlight-color: transparent;
+  /* Outer glow — warm gold ambient */
+  background: linear-gradient(180deg,
+    oklch(35% 0.12 40) 0%,
+    oklch(25% 0.1 30) 100%
+  );
+  box-shadow:
+    0 1px 0 0 oklch(72% 0.14 75 / 0.15) inset,
+    0 6px 20px oklch(20% 0.1 30 / 0.5),
+    0 0 40px oklch(48% 0.2 25 / 0.15);
+  transition: transform 120ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 120ms;
+  overflow: hidden;
 }
 
-.game-next-btn {
-  width: 100%;
-  height: 48px;
+.roll-btn-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 24px;
   border-radius: 14px;
-  background: oklch(72% 0.14 75);
+  /* Rich layered gradient — dark red wood with warm highlights */
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, oklch(50% 0.15 35 / 0.4) 0%, transparent 60%),
+    linear-gradient(180deg,
+      oklch(40% 0.18 28) 0%,
+      oklch(32% 0.2 25) 50%,
+      oklch(28% 0.18 22) 100%
+    );
+  /* Top bevel highlight */
+  border-top: 1px solid oklch(60% 0.12 40 / 0.3);
+  border-bottom: 1px solid oklch(15% 0.08 20 / 0.5);
+}
+
+.roll-btn-icon {
+  font-size: 26px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.game-roll-btn:active .roll-btn-icon {
+  transform: rotate(20deg) scale(1.1);
+}
+
+.roll-btn-text {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: oklch(82% 0.12 75);
+  text-shadow:
+    0 1px 2px rgba(0,0,0,0.4),
+    0 0 12px oklch(72% 0.14 75 / 0.2);
+}
+
+.game-roll-btn:active {
+  transform: scale(0.97) translateY(1px);
+  box-shadow:
+    0 1px 0 0 oklch(72% 0.14 75 / 0.1) inset,
+    0 2px 8px oklch(20% 0.1 30 / 0.4),
+    0 0 20px oklch(48% 0.2 25 / 0.1);
+}
+
+/* Subtle shine sweep on idle */
+.game-roll-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(90% 0.05 75 / 0.08) 50%,
+    transparent 100%
+  );
+  animation: btn-shine 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes btn-shine {
+  0%, 70%, 100% { left: -100%; }
+  85% { left: 140%; }
+}
+
+/* ── Next round button: gold accent ── */
+.game-next-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 14px 24px;
+  border-radius: 14px;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, oklch(80% 0.1 75 / 0.3) 0%, transparent 60%),
+    linear-gradient(180deg,
+      oklch(72% 0.13 75) 0%,
+      oklch(62% 0.14 72) 100%
+    );
   border: none;
-  color: oklch(10% 0.02 60);
+  border-top: 1px solid oklch(85% 0.08 75 / 0.4);
+  color: oklch(15% 0.04 60);
   font-weight: bold;
   cursor: pointer;
-  transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1), opacity 100ms;
+  box-shadow:
+    0 4px 16px oklch(65% 0.12 75 / 0.3),
+    0 0 30px oklch(72% 0.14 75 / 0.1);
+  transition: transform 120ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 120ms;
+  -webkit-tap-highlight-color: transparent;
 }
 .game-next-btn:active {
-  transform: scale(0.97);
-  opacity: 0.85;
+  transform: scale(0.97) translateY(1px);
+  box-shadow:
+    0 2px 8px oklch(65% 0.12 75 / 0.2),
+    0 0 15px oklch(72% 0.14 75 / 0.05);
 }
 </style>
