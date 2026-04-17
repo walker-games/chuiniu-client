@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ActionSheet } from 'vant'
+import 'vant/es/action-sheet/style'
 import { setLocale, type Locale, SUPPORTED_LOCALES } from '@/i18n'
 
 const { t, locale } = useI18n()
