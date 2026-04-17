@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { showActionSheet } from 'vant'
+import { ActionSheet } from 'vant'
 import { setLocale, type Locale, SUPPORTED_LOCALES } from '@/i18n'
 
 const { t, locale } = useI18n()
 
+const show = ref(false)
 const current = computed(() => locale.value as Locale)
 
 const labelMap: Record<Locale, string> = {
@@ -15,20 +16,21 @@ const labelMap: Record<Locale, string> = {
   'th': 'ไทย',
 }
 
+const actions = computed(() =>
+  SUPPORTED_LOCALES.map((loc) => ({
+    name: labelMap[loc],
+    color: loc === current.value ? '#c49a38' : undefined,
+    loc,
+  }))
+)
+
 function openSwitcher() {
-  showActionSheet({
-    title: t('langSwitcher.title'),
-    actions: SUPPORTED_LOCALES.map((loc) => ({
-      name: labelMap[loc],
-      color: loc === current.value ? '#c49a38' : undefined,
-    })),
-    cancelText: t('common.cancel'),
-    onSelect: (_, index) => {
-      const picked = SUPPORTED_LOCALES[index]
-      setLocale(picked)
-    },
-    closeOnClickAction: true,
-  })
+  show.value = true
+}
+
+function onSelect(action: { name: string; loc: Locale }) {
+  setLocale(action.loc)
+  show.value = false
 }
 </script>
 
@@ -36,6 +38,14 @@ function openSwitcher() {
   <button class="lang-switcher" :aria-label="t('langSwitcher.title')" @click="openSwitcher">
     <span class="lang-icon">🌐</span>
   </button>
+  <ActionSheet
+    v-model:show="show"
+    :title="t('langSwitcher.title')"
+    :actions="actions"
+    :cancel-text="t('common.cancel')"
+    close-on-click-action
+    @select="onSelect"
+  />
 </template>
 
 <style scoped>

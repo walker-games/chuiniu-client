@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useTelegram } from '@/composables/useTelegram'
 import { useAuthStore } from '@/stores/auth'
 import { createRoom } from '@/api/room'
+import LangSwitcher from '@/components/LangSwitcher.vue'
 
+const { t } = useI18n()
 const router = useRouter()
 const { ready, inTelegram, startParam } = useTelegram()
 const authStore = useAuthStore()
@@ -21,7 +24,7 @@ async function autoLogin() {
   const parentUser = urlParams.get('user')
   if (parentToken) {
     authStore.token = parentToken
-    authStore.user = { id: parentToken.replace('dev-', ''), name: parentUser || '玩家', avatar: '' }
+    authStore.user = { id: parentToken.replace('dev-', ''), name: parentUser || t('home.defaultPlayerName'), avatar: '' }
     localStorage.setItem('token', parentToken)
     return
   }
@@ -29,13 +32,13 @@ async function autoLogin() {
   if (inTelegram.value) {
     const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user
     const userId = tgUser?.id?.toString() || `tg-${Date.now()}`
-    const name = tgUser?.first_name || `玩家${Math.floor(Math.random() * 1000)}`
+    const name = tgUser?.first_name || `${t('home.defaultPlayerName')}${Math.floor(Math.random() * 1000)}`
     authStore.devLogin(userId, name)
     return
   }
 
   const devId = `dev-${Date.now()}`
-  authStore.devLogin(devId, `玩家${Math.floor(Math.random() * 1000)}`)
+  authStore.devLogin(devId, `${t('home.defaultPlayerName')}${Math.floor(Math.random() * 1000)}`)
 }
 
 async function handleCreate() {
@@ -45,7 +48,7 @@ async function handleCreate() {
     const res = await createRoom(authStore.user?.name)
     router.push(`/lobby/${res.room_id}`)
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : '創建房間失敗'
+    error.value = e instanceof Error ? e.message : t('home.errorCreate')
   } finally {
     loading.value = false
   }
@@ -59,7 +62,7 @@ async function handleJoin(code: string) {
     const res = await joinRoom(code, authStore.user?.name)
     router.push(`/lobby/${res.room_id}`)
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : '加入房間失敗'
+    error.value = e instanceof Error ? e.message : t('home.errorJoin')
   } finally {
     loading.value = false
   }
@@ -82,6 +85,11 @@ onMounted(async () => {
     <!-- Background -->
     <div class="home-bg" />
 
+    <!-- Top-right lang switcher -->
+    <div class="home-top-right">
+      <LangSwitcher />
+    </div>
+
     <!-- Content -->
     <div class="home-content">
       <!-- Hero: dice emoji cluster -->
@@ -93,10 +101,10 @@ onMounted(async () => {
 
       <!-- Title -->
       <h1 class="home-title font-serif-cn animate-fade-up stagger-1">
-        吹牛骰子
+        {{ t('home.title') }}
       </h1>
       <p class="home-subtitle font-serif-cn animate-fade-up stagger-2">
-        港式骰盅 · 派對必備
+        {{ t('home.subtitle') }}
       </p>
 
       <!-- Error -->
@@ -110,7 +118,7 @@ onMounted(async () => {
         :disabled="loading"
         @click="handleCreate"
       >
-        <span class="font-serif-cn text-2xl tracking-[0.3em]">開 桌</span>
+        <span class="font-serif-cn text-2xl tracking-[0.3em]">{{ t('home.createRoom') }}</span>
       </button>
 
       <!-- Join room (compact) -->
@@ -118,7 +126,7 @@ onMounted(async () => {
         <input
           v-model="inviteCode"
           type="text"
-          placeholder="房間號"
+          :placeholder="t('home.roomCodePlaceholder')"
           class="home-input-mini"
           @keyup.enter="handleJoin(inviteCode.trim())"
         />
@@ -127,7 +135,7 @@ onMounted(async () => {
           :disabled="loading || !inviteCode.trim()"
           @click="handleJoin(inviteCode.trim())"
         >
-          <span class="font-serif-cn">入座</span>
+          <span class="font-serif-cn">{{ t('home.joinRoom') }}</span>
         </button>
       </div>
 
@@ -137,7 +145,7 @@ onMounted(async () => {
         style="animation-delay: 250ms"
         @click="router.push('/history')"
       >
-        查看戰績
+        {{ t('home.history') }}
       </button>
     </div>
   </div>
@@ -156,6 +164,15 @@ onMounted(async () => {
   position: absolute;
   inset: 0;
   background: url('/images/bg-gold.jpg') center/cover no-repeat;
+}
+
+/* ── Top-right lang switcher ── */
+.home-top-right {
+  position: absolute;
+  top: env(safe-area-inset-top, 0);
+  right: 0;
+  padding: 16px;
+  z-index: 2;
 }
 
 /* ── Content ── */
