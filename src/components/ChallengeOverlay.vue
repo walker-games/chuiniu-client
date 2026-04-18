@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   visible: boolean
@@ -38,10 +41,10 @@ watch(() => props.visible, (v) => {
     >
       <div class="animate-challenge-slam flex flex-col items-center gap-3">
         <div class="challenge-main-text font-serif-cn font-bold text-cn-red text-center leading-none">
-          開!
+          {{ t('game.challengeButton') }}
         </div>
         <div class="text-cn-cream/60 text-lg font-serif-cn">
-          {{ challengerName }} 開骰
+          {{ t('game.challengerCall', { name: challengerName }) }}
         </div>
       </div>
     </div>

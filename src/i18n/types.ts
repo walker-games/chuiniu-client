@@ -10,6 +10,10 @@ export type MessageSchema = {
     waiting: string
     you: string
     unknown: string
+    clickToClose: string
+    copyLink: string
+    tgShareText: string
+    tgShare: string
   }
   home: {
     title: string
@@ -67,6 +71,11 @@ export type MessageSchema = {
     challengeBid: string
     challengeActual: string
     challengeResult: string
+    challengerCall: string
+    countUnit: string
+    confirmBidPrefix: string
+    rolledTag: string
+    myDice: string
   }
   result: {
     title: string

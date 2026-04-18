@@ -12,6 +12,10 @@ const messages: MessageSchema = {
     waiting: 'กำลังรอ',
     you: 'คุณ',
     unknown: '???',
+    clickToClose: 'แตะเพื่อปิด',
+    copyLink: 'คัดลอกลิงก์',
+    tgShareText: 'มาเล่นโกหกทอยลูกเต๋ากัน!',
+    tgShare: 'แชร์ใน TG',
   },
   home: {
     title: 'โกหกทอยลูกเต๋า',
@@ -69,6 +73,11 @@ const messages: MessageSchema = {
     challengeBid: 'เดิมพัน: {bid}',
     challengeActual: 'จริง: {count}',
     challengeResult: '{winner} ชนะ! {loser} ถูกลงโทษ',
+    challengerCall: '{name} เปิด',
+    countUnit: '',
+    confirmBidPrefix: 'เรียก!',
+    rolledTag: 'ทอยแล้ว',
+    myDice: 'ลูกเต๋าของฉัน',
   },
   result: {
     title: 'เปิดไพ่!',

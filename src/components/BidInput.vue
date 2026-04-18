@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { Bid } from '@/types/game'
+
+const { t } = useI18n()
 
 const CDN = '/images/dice'
 
@@ -68,7 +71,7 @@ function isBidValid() {
 }
 
 const canSubmit = computed(() => isBidValid() && count.value <= props.maxCount)
-const modeText = computed(() => mode.value === 'fei' ? '飛' : '齋')
+const modeText = computed(() => mode.value === 'fei' ? t('game.modeFei') : t('game.modeZhai'))
 </script>
 
 <template>
@@ -94,7 +97,7 @@ const modeText = computed(() => mode.value === 'fei' ? '飛' : '齋')
         <button class="st-btn" :disabled="count >= maxCount" @click="increment">+</button>
       </div>
 
-      <span class="bid-label font-serif-cn">個</span>
+      <span class="bid-label font-serif-cn">{{ t('game.countUnit') }}</span>
 
       <div class="face-preview">
         <img :src="`${CDN}/dice-${face}.png`" class="preview-img" />
@@ -116,14 +119,14 @@ const modeText = computed(() => mode.value === 'fei' ? '飛' : '齋')
         :disabled="!canSubmit"
         @click="$emit('bid', { count, face, mode })"
       >
-        <span class="font-serif-cn">叫! {{ count }}個{{ face }} {{ modeText }}</span>
+        <span class="font-serif-cn">{{ t('game.confirmBidPrefix') }} {{ t('result.bidDisplayTemplate', { count, face, mode: modeText }) }}</span>
       </button>
       <button
         v-if="previousBid"
         class="btn-challenge"
         @click="$emit('challenge')"
       >
-        <span class="font-serif-cn">開!</span>
+        {{ t('game.challengeButton') }}
       </button>
     </div>
   </div>

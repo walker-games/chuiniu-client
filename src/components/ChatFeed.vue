@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, watch, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { ChatMessage } from '@/types/game'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   messages: ChatMessage[]
@@ -35,7 +38,7 @@ watch(
       <!-- roll message -->
       <div v-else-if="msg.type === 'roll'" class="msg-roll">
         <span class="msg-name">{{ msg.playerName }}</span>
-        <span class="msg-dim">已搖</span>
+        <span class="msg-dim">{{ t('game.rolledTag') }}</span>
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6a9a40" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
 
@@ -47,12 +50,16 @@ watch(
 
       <!-- challenge message -->
       <div v-else-if="msg.type === 'challenge'" class="msg-challenge font-serif-cn">
-        {{ msg.playerName }}: 開!
+        {{ msg.playerName }}: {{ t('game.challengeButton') }}
       </div>
 
       <!-- result message -->
       <div v-else-if="msg.type === 'result'" class="msg-result">
         <template v-for="(line, i) in msg.text.split('\n')" :key="i">
+          <!-- NOTE: These substring checks match Chinese text only. Under other locales
+               the win/punish/bid specific styling won't apply, but the message still
+               renders via the fallback <p>. Ideally ChatMessage should carry a subtype
+               field — leaving for a future refactor. -->
           <p v-if="line.includes('贏')" class="result-win font-serif-cn">{{ line }}</p>
           <p v-else-if="line.includes('懲罰')" class="result-punish font-serif-cn">{{ line }}</p>
           <p v-else-if="line.includes('叫點')" class="result-bid">{{ line }}</p>

@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 defineProps<{
   text: string
@@ -35,7 +38,7 @@ onMounted(() => {
       <div class="text-2xl text-cn-gold font-serif-cn font-bold mt-2">
         {{ loserName }}
       </div>
-      <div class="text-sm text-cn-muted mt-4">點擊關閉</div>
+      <div class="text-sm text-cn-muted mt-4">{{ t('common.clickToClose') }}</div>
     </div>
   </div>
 </template>

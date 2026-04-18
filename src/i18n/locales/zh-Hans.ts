@@ -12,6 +12,10 @@ const messages: MessageSchema = {
     waiting: '等待中',
     you: '我',
     unknown: '???',
+    clickToClose: '点击关闭',
+    copyLink: '复制链接',
+    tgShareText: '来吹牛骰子!',
+    tgShare: 'TG 分享',
   },
   home: {
     title: '吹牛骰子',
@@ -69,6 +73,11 @@ const messages: MessageSchema = {
     challengeBid: '叫点: {bid}',
     challengeActual: '实际: {count}个',
     challengeResult: '{winner} 赢! {loser} 受罚',
+    challengerCall: '{name} 开骰',
+    countUnit: '个',
+    confirmBidPrefix: '叫!',
+    rolledTag: '已摇',
+    myDice: '我的骰子',
   },
   result: {
     title: '开奖!',

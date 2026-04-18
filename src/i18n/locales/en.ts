@@ -12,6 +12,10 @@ const messages: MessageSchema = {
     waiting: 'Waiting',
     you: 'You',
     unknown: '???',
+    clickToClose: 'Tap to close',
+    copyLink: 'Copy Link',
+    tgShareText: "Come play Liar's Dice!",
+    tgShare: 'Share on TG',
   },
   home: {
     title: 'Liar\'s Dice',
@@ -69,6 +73,11 @@ const messages: MessageSchema = {
     challengeBid: 'Bid: {bid}',
     challengeActual: 'Actual: {count}',
     challengeResult: '{winner} wins! {loser} punished',
+    challengerCall: '{name} calls',
+    countUnit: '',
+    confirmBidPrefix: 'Call!',
+    rolledTag: 'rolled',
+    myDice: 'My Dice',
   },
   result: {
     title: 'Reveal!',
