@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useWebSocket } from '@/composables/useWebSocket'
 import { useAuthStore } from '@/stores/auth'
 import { useRoomStore } from '@/stores/room'
 import PlayerSeat from '@/components/PlayerSeat.vue'
 import QrShare from '@/components/QrShare.vue'
 import type { WSMessage } from '@/types/ws'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const router = useRouter()
@@ -62,17 +65,17 @@ onMounted(() => {
     <div class="lobby-header animate-fade-up">
       <div class="flex items-center justify-between">
         <div class="flex items-baseline gap-2">
-          <span class="text-gold-dim text-xs">房間</span>
+          <span class="text-gold-dim text-xs">{{ t('lobby.roomLabel') }}</span>
           <span class="text-gold font-serif-cn text-xl font-bold tracking-wider">{{ roomId.slice(0, 6) }}</span>
         </div>
-        <span class="text-gold-dim text-xs">共{{ players.length }}/{{ maxSeats }}</span>
+        <span class="text-gold-dim text-xs">{{ t('lobby.playersCount', { current: players.length, max: maxSeats }) }}</span>
       </div>
-      <p class="text-gold-dim text-xs mt-1.5 tracking-wider">等待玩家加入...</p>
+      <p class="text-gold-dim text-xs mt-1.5 tracking-wider">{{ t('lobby.waitingToJoin') }}</p>
     </div>
 
     <!-- Players card -->
     <div class="lobby-card animate-fade-up stagger-1">
-      <p class="card-label font-serif-cn">玩家</p>
+      <p class="card-label font-serif-cn">{{ t('lobby.playersCardTitle') }}</p>
       <div class="flex gap-3 justify-center flex-wrap py-2">
         <PlayerSeat
           v-for="(p, idx) in players"
@@ -92,7 +95,7 @@ onMounted(() => {
 
     <!-- QR card -->
     <div class="lobby-card animate-fade-up stagger-2">
-      <p class="card-label font-serif-cn">邀請好友</p>
+      <p class="card-label font-serif-cn">{{ t('lobby.inviteFriendCardTitle') }}</p>
       <div class="flex justify-center pt-1">
         <QrShare :invite-code="inviteCode" />
       </div>
@@ -109,14 +112,14 @@ onMounted(() => {
         :class="{ 'lobby-ready-btn--done': isReady }"
         @click="toggleReady"
       >
-        <span class="font-serif-cn text-xl tracking-[0.2em]">{{ isReady ? '取消準備' : '準 備' }}</span>
+        <span class="font-serif-cn text-xl tracking-[0.2em]">{{ isReady ? t('lobby.cancelReady') : t('lobby.ready') }}</span>
       </button>
     </div>
 
     <!-- Entering overlay -->
     <div v-if="entering" class="absolute inset-0 z-50 flex flex-col items-center justify-center" style="background:#000000e6;">
       <div class="w-10 h-10 border-2 border-gold/30 border-t-gold rounded-full animate-spin mb-4" />
-      <p class="text-gold font-serif-cn text-xl">進入遊戲中...</p>
+      <p class="text-gold font-serif-cn text-xl">{{ t('lobby.entering') }}</p>
     </div>
   </div>
 </template>
