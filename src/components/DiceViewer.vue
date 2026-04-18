@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import DiceFace from './DiceFace.vue'
+
+const { t } = useI18n()
 
 defineProps<{
   dice: number[]
@@ -24,7 +27,7 @@ const emit = defineEmits<{
       <!-- Sheet -->
       <div class="viewer-sheet">
         <div class="w-10 h-1 rounded-full mx-auto mb-4" style="background:#d4a85340;" />
-        <p class="text-xs mb-4 font-serif-cn tracking-wider pl-1" style="color:#d4a85390;">我的骰子</p>
+        <p class="text-xs mb-4 font-serif-cn tracking-wider pl-1" style="color:#d4a85390;">{{ t('game.myDice') }}</p>
         <div class="flex justify-center gap-3 pb-2">
           <div
             v-for="(d, i) in dice"

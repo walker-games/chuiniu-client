@@ -1,14 +1,23 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-defineProps<{
-  text: string
+const { t } = useI18n()
+
+const props = defineProps<{
+  punishKey?: string
+  text?: string
   loserName: string
 }>()
 
 const emit = defineEmits<{
   close: []
 }>()
+
+const displayText = computed(() => {
+  if (props.punishKey) return t(props.punishKey)
+  return props.text ?? ''
+})
 
 const shaking = ref(false)
 
@@ -29,13 +38,13 @@ onMounted(() => {
       <!-- Red stamp circle border -->
       <div class="stamp-ring rounded-full p-6 border-4 border-cn-red">
         <div class="punishment-title font-serif-cn leading-tight text-center font-bold text-cn-red">
-          {{ text }}
+          {{ displayText }}
         </div>
       </div>
       <div class="text-2xl text-cn-gold font-serif-cn font-bold mt-2">
         {{ loserName }}
       </div>
-      <div class="text-sm text-cn-muted mt-4">點擊關閉</div>
+      <div class="text-sm text-cn-muted mt-4">{{ t('common.clickToClose') }}</div>
     </div>
   </div>
 </template>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useWebSocket } from '@/composables/useWebSocket'
 import { useAuthStore } from '@/stores/auth'
@@ -11,10 +12,10 @@ import BidInput from '@/components/BidInput.vue'
 import DiceViewer from '@/components/DiceViewer.vue'
 import BidAnnouncement from '@/components/BidAnnouncement.vue'
 import ChallengeOverlay from '@/components/ChallengeOverlay.vue'
-import type { WSMessage } from '@/types/ws'
+import type { WSMessage, RollResultData, PunishmentData } from '@/types/ws'
 import type { ChatMessage } from '@/types/game'
-import type { RollResultData } from '@/types/ws'
 
+const { t } = useI18n()
 const route = useRoute()
 const authStore = useAuthStore()
 const roomStore = useRoomStore()
@@ -139,7 +140,7 @@ function handleNextRound() {
   gameStore.reset()
   hasRolled.value = false
   showNextRound.value = false
-  addMsg('system', '--- 新一輪 ---')
+  addMsg('system', t('game.newRound'))
   send('ready', { ready: true })
 }
 
@@ -147,7 +148,7 @@ onMounted(() => {
   initAudio()
   connect(roomId, authStore.token, authStore.user?.name)
 
-  addMsg('system', '進入房間，等待遊戲開始...')
+  addMsg('system', t('game.systemEnterRoom'))
 
   on('room_state', (msg: WSMessage) => {
     console.log('[Game] room_state received, phase:', (msg.data as any)?.round?.phase, 'players:', (msg.data as any)?.players?.length)
@@ -181,19 +182,19 @@ onMounted(() => {
     gameStore.setDice(data.dice)
     hasRolled.value = true
     play('reveal')
-    addMsg('roll', '', myId.value, '我')
+    addMsg('roll', '', myId.value, t('common.you'))
   })
 
   on('game_start', () => {
     gameStore.reset()
     hasRolled.value = false
     showNextRound.value = false
-    addMsg('system', `第${roundNumber.value}輪開始!`)
+    addMsg('system', t('game.roundStarted', { n: roundNumber.value }))
   })
 
   on('all_rolled', () => {
     gameStore.setPhase('bidding')
-    addMsg('system', '全部就緒，開始叫點!')
+    addMsg('system', t('game.allReady'))
   })
 
   on('bid_made', (msg: WSMessage) => {
@@ -205,13 +206,13 @@ onMounted(() => {
       mode: data.mode as 'fei' | 'zhai',
     })
     const name = getPlayerName(data.player_id)
-    const modeText = data.mode === 'fei' ? '飛' : '齋'
-    addMsg('bid', `${data.count}個${data.face} ${modeText}`, data.player_id, name)
+    const modeText = data.mode === 'fei' ? t('game.modeFei') : t('game.modeZhai')
+    addMsg('bid', t('result.bidDisplayTemplate', { count: data.count, face: data.face, mode: modeText }), data.player_id, name)
 
     // Show bid announcement overlay
     bidAnnounce.value = {
       visible: true,
-      text: `${data.count}個${data.face} ${modeText}`,
+      text: t('result.bidDisplayTemplate', { count: data.count, face: data.face, mode: modeText }),
       playerName: name,
     }
   })
@@ -221,7 +222,7 @@ onMounted(() => {
     const turnId = data.turn_player_id || data.playerId
     gameStore.setTurn(turnId)
     const name = getPlayerName(turnId)
-    addMsg('system', `輪到 ${name}`)
+    addMsg('system', t('game.turnOf', { name }))
   })
 
   on('challenge_result', (msg: WSMessage) => {
@@ -257,30 +258,33 @@ onMounted(() => {
     }
     triggerShake()
 
-    const modeText = data.bid?.mode === 'fei' ? '飛' : '齋'
-    const bidText = `${data.bid?.count}個${data.bid?.face} ${modeText}`
+    const modeText = data.bid?.mode === 'fei' ? t('game.modeFei') : t('game.modeZhai')
+    const bidText = t('result.bidDisplayTemplate', { count: data.bid?.count, face: data.bid?.face, mode: modeText })
     const winnerName = getPlayerName(data.winner)
     const loserName = getPlayerName(data.loser)
-    addMsg(
-      'result',
-      `${challengerName} 開 ${bidderName}\n叫點: ${bidText}\n實際: ${data.actual_count}個\n${winnerName} 贏! ${loserName} 受罰`,
-    )
+    addMsg('result', t('game.challengeCall', { challenger: challengerName, bidder: bidderName }))
+    addMsg('result', t('game.challengeBid', { bid: bidText }))
+    addMsg('result', t('game.challengeActual', { count: data.actual_count }))
+    addMsg('result', t('game.challengeResult', { winner: winnerName, loser: loserName }))
     play('challenge')
   })
 
+  on('error', (msg: WSMessage) => {
+    const data = msg.data as { code: string; params?: Record<string, unknown> }
+    if (!data?.code) return
+    const text = t(data.code, (data.params ?? {}) as Record<string, unknown>)
+    addMsg('system', text)
+  })
+
   on('punishment', (msg: WSMessage) => {
-    const data = msg.data as any
-    const loserId = data.loser
-    const name = getPlayerName(loserId)
-    const punishText = typeof data.punishment === 'string' ? data.punishment : data.punishment?.text || '飲一杯'
+    const data = msg.data as PunishmentData
+    const name = getPlayerName(data.loser)
+    const punishText = t(data.punishment_key) || data.punishment_text
 
     // Store punishment for Result page
-    gameStore.punishment = {
-      playerId: loserId,
-      punishment: { text: punishText, level: data.level || 1 },
-    }
+    gameStore.punishment = data
 
-    addMsg('result', `${name} 的懲罰: ${punishText}`)
+    addMsg('result', t('game.punishmentMsg', { name, text: punishText }))
     play('punishment')
     showNextRound.value = true
   })
@@ -288,7 +292,7 @@ onMounted(() => {
   on('player_left', (msg: WSMessage) => {
     const data = msg.data as any
     const name = getPlayerName(data.player_id)
-    addMsg('system', `${name} 離開了房間`)
+    addMsg('system', t('game.playerLeftMsg', { name }))
   })
 
   on('round_end', (_msg: WSMessage) => {
@@ -304,8 +308,8 @@ onMounted(() => {
   >
     <!-- Top bar -->
     <div class="game-topbar shrink-0">
-      <span class="font-serif-cn topbar-round">第{{ roundNumber }}輪</span>
-      <span class="topbar-players">共{{ playerCount }}人</span>
+      <span class="font-serif-cn topbar-round">{{ t('game.roundN', { n: roundNumber }) }}</span>
+      <span class="topbar-players">{{ t('game.playersTotal', { n: playerCount }) }}</span>
     </div>
 
     <!-- Chat feed -->
@@ -324,7 +328,7 @@ onMounted(() => {
         >
           <div class="roll-btn-inner">
             <span class="roll-btn-icon">🎲</span>
-            <span class="font-serif-cn roll-btn-text">搖 骰 子</span>
+            <span class="font-serif-cn roll-btn-text tracking-widest">{{ t('game.rollButton') }}</span>
           </div>
         </button>
       </div>
@@ -335,7 +339,7 @@ onMounted(() => {
         class="wait-bar"
       >
         <div class="animate-dice-wobble wait-icon">🎲</div>
-        <span class="wait-text font-serif-cn">等待其他玩家搖骰子...</span>
+        <span class="wait-text font-serif-cn">{{ t('game.waitingOthersRoll') }}</span>
       </div>
 
       <!-- Bidding phase: my turn -->
@@ -359,7 +363,7 @@ onMounted(() => {
           <span class="dot" /><span class="dot" /><span class="dot" />
         </div>
         <span class="wait-text font-serif-cn">
-          等待 <span style="color:#f0d080;">{{ currentTurnName }}</span> 叫點...
+          {{ t('game.waitingPlayer', { name: currentTurnName }) }}
         </span>
       </div>
 
@@ -369,7 +373,7 @@ onMounted(() => {
           class="game-next-btn"
           @click="handleNextRound"
         >
-          <span class="font-serif-cn text-lg font-bold">下一輪</span>
+          <span class="font-serif-cn text-lg font-bold">{{ t('game.nextRound') }}</span>
         </button>
       </div>
     </div>
@@ -420,7 +424,10 @@ onMounted(() => {
   flex-direction: column;
   height: 100vh;
   height: 100dvh;
-  background: url('/images/bg-gold.jpg') center/cover no-repeat, #1a1508;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 38%, oklch(28% 0.06 60 / 0.9) 0%, transparent 70%),
+    radial-gradient(ellipse at 50% 100%, oklch(20% 0.05 55) 0%, oklch(10% 0.02 55) 100%),
+    #1a1508;
   overflow: hidden;
 }
 

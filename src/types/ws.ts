@@ -38,9 +38,16 @@ export interface ChallengeResultData {
   loser: string
 }
 
+export interface ErrorData {
+  code: string
+  params?: Record<string, unknown>
+}
+
 export interface PunishmentData {
-  playerId: string
-  punishment: import('./game').Punishment
+  loser: string
+  punishment_key: string
+  punishment_text: string
+  level: number
 }
 
 export interface RoundEndData {

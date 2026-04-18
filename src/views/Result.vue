@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { Button } from 'vant'
 import 'vant/es/button/style'
 import { useAuthStore } from '@/stores/auth'
@@ -8,6 +9,8 @@ import { useRoomStore } from '@/stores/room'
 import { useGameStore } from '@/stores/game'
 import DiceFace from '@/components/DiceFace.vue'
 import PunishmentAnimation from '@/components/PunishmentAnimation.vue'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const router = useRouter()
@@ -25,29 +28,30 @@ const myId = computed(() => authStore.user?.id ?? '')
 
 const challengerName = computed(() => {
   const p = players.value.find((pl) => pl.id === result.value?.challenger)
-  return p?.name ?? '???'
+  return p?.name ?? t('common.unknown')
 })
 
 const targetName = computed(() => {
   const p = players.value.find((pl) => pl.id === result.value?.target)
-  return p?.name ?? '???'
+  return p?.name ?? t('common.unknown')
 })
 
 const bidText = computed(() => {
   const bid = result.value?.bid
   if (!bid) return ''
-  const modeText = bid.mode === 'fei' ? '飛' : '齋'
-  return `${bid.count}個${bid.face} ${modeText}`
+  const modeText = bid.mode === 'fei' ? t('game.modeFei') : t('game.modeZhai')
+  return t('result.bidDisplayTemplate', { count: bid.count, face: bid.face, mode: modeText })
 })
 
 const loserName = computed(() => {
   const p = players.value.find((pl) => pl.id === result.value?.loser)
-  return p?.name ?? '???'
+  return p?.name ?? t('common.unknown')
 })
 
 const isWinner = computed(() => result.value?.winner === myId.value)
 
-const punishmentText = computed(() => gameStore.punishment?.punishment?.text ?? '')
+const punishmentKey = computed(() => gameStore.punishment?.punishment_key ?? '')
+const punishmentText = computed(() => gameStore.punishment?.punishment_text ?? '')
 
 function getPlayerName(id: string) {
   const p = players.value.find((pl) => pl.id === id)
@@ -69,7 +73,7 @@ onMounted(() => {
   setTimeout(() => { shaking.value = false }, 500)
 
   setTimeout(() => {
-    if (punishmentText.value) {
+    if (punishmentKey.value || punishmentText.value) {
       showPunishment.value = true
     }
   }, 1500)
@@ -82,17 +86,17 @@ onMounted(() => {
     :class="{ 'animate-shake-screen': shaking }"
   >
     <!-- Header -->
-    <h1 class="result-title font-serif-cn text-center mb-6 font-bold animate-fade-up">開獎!</h1>
+    <h1 class="result-title font-serif-cn text-center mb-6 font-bold animate-fade-up">{{ t('result.title') }}</h1>
 
     <template v-if="result">
       <!-- Challenge info -->
       <div class="mb-4 py-3 surface-card px-4 space-y-1 animate-fade-up stagger-1">
         <p class="text-cn-cream/50 text-sm">
-          <span class="text-cn-gold font-serif-cn">{{ targetName }}</span> 叫:
+          <span class="text-cn-gold font-serif-cn">{{ targetName }}</span> {{ t('result.bidBy') }}
           <span class="text-cn-gold font-serif-cn text-lg font-bold">{{ bidText }}</span>
         </p>
         <p class="text-cn-cream/50 text-sm">
-          <span class="text-cn-red font-serif-cn font-bold">{{ challengerName }}</span> 開了!
+          <span class="text-cn-red font-serif-cn font-bold">{{ challengerName }}</span> {{ t('result.challengedBy') }}
         </p>
       </div>
 
@@ -128,7 +132,7 @@ onMounted(() => {
 
       <!-- Actual count -->
       <div class="mb-4 animate-fade-up stagger-3">
-        <span class="text-cn-muted text-sm">實際數量:</span>
+        <span class="text-cn-muted text-sm">{{ t('result.actualCount') }}</span>
         <span class="text-cn-gold font-serif-cn text-2xl font-bold ml-2">{{ result.actualCount }}</span>
       </div>
 
@@ -141,7 +145,7 @@ onMounted(() => {
           class="font-serif-cn text-2xl font-bold"
           :class="isWinner ? 'text-cn-gold' : 'text-cn-red'"
         >
-          {{ isWinner ? '你贏了!' : '你輸了...' }}
+          {{ isWinner ? t('result.youWin') : t('result.youLose') }}
         </p>
       </div>
     </template>
@@ -153,13 +157,14 @@ onMounted(() => {
         size="large"
         @click="nextRound"
       >
-        <span class="font-serif-cn text-xl tracking-wider">下一輪</span>
+        <span class="font-serif-cn text-xl tracking-wider">{{ t('result.nextRound') }}</span>
       </Button>
     </div>
 
     <!-- Punishment overlay -->
     <PunishmentAnimation
-      v-if="showPunishment && punishmentText"
+      v-if="showPunishment && (punishmentKey || punishmentText)"
+      :punish-key="punishmentKey"
       :text="punishmentText"
       :loser-name="loserName"
       @close="showPunishment = false"

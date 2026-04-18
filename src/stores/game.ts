@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { Bid, Punishment } from '@/types/game'
+import type { Bid } from '@/types/game'
+import type { PunishmentData } from '@/types/ws'
 
 export const useGameStore = defineStore('game', () => {
   const myDice = ref<number[]>([])
@@ -19,7 +20,7 @@ export const useGameStore = defineStore('game', () => {
     loser: string
   } | null>(null)
 
-  const punishment = ref<{ playerId: string; punishment: Punishment } | null>(null)
+  const punishment = ref<PunishmentData | null>(null)
 
   function setDice(dice: number[]) { myDice.value = dice }
   function setBid(bid: Bid) { currentBid.value = bid; bidHistory.value.push(bid) }

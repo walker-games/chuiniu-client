@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Button } from 'vant'
+
+const { t } = useI18n()
 import 'vant/es/button/style'
 import QRCode from 'qrcode'
 import { useTelegram } from '@/composables/useTelegram'
@@ -38,7 +41,7 @@ function copyLink() {
 }
 
 function shareToTG() {
-  const text = encodeURIComponent('來吹牛骰子!')
+  const text = encodeURIComponent(t('common.tgShareText'))
   const url = encodeURIComponent(link.value)
   tg?.openTelegramLink(`https://t.me/share/url?url=${url}&text=${text}`)
 }
@@ -58,7 +61,7 @@ watch(() => props.inviteCode, renderQR)
       >
         <span class="flex items-center gap-1.5">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-          {{ copied ? '已複製' : '複製連結' }}
+          {{ copied ? t('common.copied') : t('common.copyLink') }}
         </span>
       </Button>
       <Button
@@ -68,7 +71,7 @@ watch(() => props.inviteCode, renderQR)
       >
         <span class="flex items-center gap-1.5">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-          TG 分享
+          {{ t('common.tgShare') }}
         </span>
       </Button>
     </div>
