@@ -85,8 +85,8 @@ onMounted(async () => {
     <!-- Background -->
     <div class="home-bg" />
 
-    <!-- Top-right lang switcher -->
-    <div class="home-top-right">
+    <!-- Top-left lang switcher (top-right reserved for TG/CardLottery close FAB) -->
+    <div class="home-top-left">
       <LangSwitcher />
     </div>
 
@@ -159,18 +159,30 @@ onMounted(async () => {
   overflow: hidden;
 }
 
-/* ── Background: warm radial glow + subtle texture ── */
+/* ── Background: warm radial glow, pure CSS (no decorative rule lines) ── */
 .home-bg {
   position: absolute;
   inset: 0;
-  background: url('/images/bg-gold.jpg') center/cover no-repeat;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 38%, oklch(28% 0.06 60 / 0.9) 0%, transparent 70%),
+    radial-gradient(ellipse at 50% 100%, oklch(20% 0.05 55) 0%, oklch(10% 0.02 55) 100%);
 }
 
-/* ── Top-right lang switcher ── */
-.home-top-right {
+.home-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 30%, oklch(85% 0.12 80 / 0.06) 0, transparent 40%),
+    radial-gradient(circle at 80% 70%, oklch(85% 0.12 80 / 0.04) 0, transparent 35%);
+  pointer-events: none;
+}
+
+/* ── Top-left lang switcher (top-right is used by the CardLottery close FAB) ── */
+.home-top-left {
   position: absolute;
   top: env(safe-area-inset-top, 0);
-  right: 0;
+  left: 0;
   padding: 16px;
   z-index: 2;
 }

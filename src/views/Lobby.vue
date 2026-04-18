@@ -134,7 +134,10 @@ onMounted(() => {
   min-height: 100dvh;
   padding: 12px 14px 16px;
   gap: 10px;
-  background: url('/images/bg-gold.jpg') center/cover no-repeat, #1a1508;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 38%, oklch(28% 0.06 60 / 0.9) 0%, transparent 70%),
+    radial-gradient(ellipse at 50% 100%, oklch(20% 0.05 55) 0%, oklch(10% 0.02 55) 100%),
+    #1a1508;
 }
 
 /* ── Header ── */
