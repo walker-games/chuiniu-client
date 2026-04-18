@@ -1,3 +1,5 @@
+import { i18n } from '@/i18n'
+
 const BASE = import.meta.env.VITE_API_BASE ?? ''
 
 async function authFetch(path: string, options: RequestInit = {}) {
@@ -12,6 +14,10 @@ async function authFetch(path: string, options: RequestInit = {}) {
   })
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
+    if (body.code) {
+      const localized = i18n.global.t(body.code, body.params ?? {})
+      throw new Error(localized)
+    }
     throw new Error(body.error ?? `HTTP ${res.status}`)
   }
   return res.json()

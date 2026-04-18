@@ -12,9 +12,8 @@ import BidInput from '@/components/BidInput.vue'
 import DiceViewer from '@/components/DiceViewer.vue'
 import BidAnnouncement from '@/components/BidAnnouncement.vue'
 import ChallengeOverlay from '@/components/ChallengeOverlay.vue'
-import type { WSMessage } from '@/types/ws'
+import type { WSMessage, RollResultData, PunishmentData } from '@/types/ws'
 import type { ChatMessage } from '@/types/game'
-import type { RollResultData } from '@/types/ws'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -270,17 +269,20 @@ onMounted(() => {
     play('challenge')
   })
 
+  on('error', (msg: WSMessage) => {
+    const data = msg.data as { code: string; params?: Record<string, unknown> }
+    if (!data?.code) return
+    const text = t(data.code, (data.params ?? {}) as Record<string, unknown>)
+    addMsg('system', text)
+  })
+
   on('punishment', (msg: WSMessage) => {
-    const data = msg.data as any
-    const loserId = data.loser
-    const name = getPlayerName(loserId)
-    const punishText = typeof data.punishment === 'string' ? data.punishment : data.punishment?.text || t('punishment.drink1')
+    const data = msg.data as PunishmentData
+    const name = getPlayerName(data.loser)
+    const punishText = t(data.punishment_key) || data.punishment_text
 
     // Store punishment for Result page
-    gameStore.punishment = {
-      playerId: loserId,
-      punishment: { text: punishText, level: data.level || 1 },
-    }
+    gameStore.punishment = data
 
     addMsg('result', t('game.punishmentMsg', { name, text: punishText }))
     play('punishment')

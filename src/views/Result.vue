@@ -50,7 +50,8 @@ const loserName = computed(() => {
 
 const isWinner = computed(() => result.value?.winner === myId.value)
 
-const punishmentText = computed(() => gameStore.punishment?.punishment?.text ?? '')
+const punishmentKey = computed(() => gameStore.punishment?.punishment_key ?? '')
+const punishmentText = computed(() => gameStore.punishment?.punishment_text ?? '')
 
 function getPlayerName(id: string) {
   const p = players.value.find((pl) => pl.id === id)
@@ -72,7 +73,7 @@ onMounted(() => {
   setTimeout(() => { shaking.value = false }, 500)
 
   setTimeout(() => {
-    if (punishmentText.value) {
+    if (punishmentKey.value || punishmentText.value) {
       showPunishment.value = true
     }
   }, 1500)
@@ -162,7 +163,8 @@ onMounted(() => {
 
     <!-- Punishment overlay -->
     <PunishmentAnimation
-      v-if="showPunishment && punishmentText"
+      v-if="showPunishment && (punishmentKey || punishmentText)"
+      :punish-key="punishmentKey"
       :text="punishmentText"
       :loser-name="loserName"
       @close="showPunishment = false"
