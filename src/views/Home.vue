@@ -85,11 +85,6 @@ onMounted(async () => {
     <!-- Background -->
     <div class="home-bg" />
 
-    <!-- Top-left lang switcher (top-right reserved for TG/CardLottery close FAB) -->
-    <div class="home-top-left">
-      <LangSwitcher />
-    </div>
-
     <!-- Content -->
     <div class="home-content">
       <!-- Hero: dice emoji cluster -->
@@ -139,14 +134,16 @@ onMounted(async () => {
         </button>
       </div>
 
-      <!-- History link -->
-      <button
-        class="home-history animate-fade-up"
-        style="animation-delay: 250ms"
-        @click="router.push('/history')"
-      >
-        {{ t('home.history') }}
-      </button>
+      <!-- Footer row: history + lang switcher -->
+      <div class="home-footer animate-fade-up" style="animation-delay: 250ms">
+        <button
+          class="home-history"
+          @click="router.push('/history')"
+        >
+          {{ t('home.history') }}
+        </button>
+        <LangSwitcher />
+      </div>
     </div>
   </div>
 </template>
@@ -178,13 +175,12 @@ onMounted(async () => {
   pointer-events: none;
 }
 
-/* ── Top-left lang switcher (top-right is used by the CardLottery close FAB) ── */
-.home-top-left {
-  position: absolute;
-  top: env(safe-area-inset-top, 0);
-  left: 0;
-  padding: 16px;
-  z-index: 2;
+/* ── Footer actions row (history link + lang switcher) ── */
+.home-footer {
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 /* ── Content ── */
@@ -390,7 +386,6 @@ onMounted(async () => {
 
 /* ── History link ── */
 .home-history {
-  margin-top: 28px;
   background: none;
   border: none;
   color: oklch(45% 0.03 60);
