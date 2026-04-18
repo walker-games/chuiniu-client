@@ -58,6 +58,15 @@ export type MessageSchema = {
     disconnected: string
     systemEnterRoom: string
     dragHint: string
+    turnOf: string
+    punishmentMsg: string
+    playerLeftMsg: string
+    playersTotal: string
+    waitingOthersRoll: string
+    challengeCall: string
+    challengeBid: string
+    challengeActual: string
+    challengeResult: string
   }
   result: {
     title: string
